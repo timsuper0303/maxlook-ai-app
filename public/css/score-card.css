@@ -1,0 +1,274 @@
+/* ═══════════════════════════════════════════════════════
+   Score Card Component — Umax-style
+   Reusable di dashboard widget + result hero
+   ═══════════════════════════════════════════════════════ */
+
+.score-card {
+  background: linear-gradient(180deg, #141414 0%, #0d0d0d 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 28px;
+  padding: 24px 22px 22px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+}
+body.woman .score-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fff8fa 100%);
+  border-color: rgba(232,99,154,0.15);
+  box-shadow: 0 24px 80px rgba(176,48,112,0.10);
+}
+
+/* Top avatar */
+.sc-avatar-wrap {
+  text-align: center;
+  margin-bottom: 18px;
+  position: relative;
+}
+.sc-avatar {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  margin: 0 auto;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,0.15);
+  box-shadow: 0 0 0 4px rgba(255,255,255,0.04), 0 8px 24px rgba(0,0,0,0.4);
+}
+body.woman .sc-avatar {
+  border-color: rgba(232,99,154,0.25);
+  box-shadow: 0 0 0 4px rgba(232,99,154,0.06), 0 8px 24px rgba(176,48,112,0.18);
+}
+.sc-hello {
+  margin-top: 12px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.sc-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  font-weight: 600;
+}
+body.woman .sc-sub { color: rgba(58,16,32,0.55); }
+
+/* Progression badges (scan #2+) */
+.sc-progression {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.sc-scan-num {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+body.woman .sc-scan-num {
+  background: rgba(232,99,154,0.08);
+  color: rgba(58,16,32,0.7);
+  border-color: rgba(232,99,154,0.15);
+}
+.sc-delta-pill {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 4px 11px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sc-delta-pill.small {
+  font-size: 9px;
+  padding: 3px 9px;
+  opacity: 0.8;
+}
+.sc-delta-pill.up {
+  background: linear-gradient(135deg, rgba(0,224,140,0.18), rgba(0,255,140,0.10));
+  color: #00e08c;
+  border: 1px solid rgba(0,224,140,0.30);
+}
+.sc-delta-pill.down {
+  background: linear-gradient(135deg, rgba(255,80,80,0.15), rgba(255,80,80,0.05));
+  color: #ff7070;
+  border: 1px solid rgba(255,80,80,0.25);
+}
+body.woman .sc-delta-pill.up { color: #008844; }
+body.woman .sc-delta-pill.down { color: #c44; }
+
+/* Score grid — 2 columns × 3 rows */
+.sc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.sc-cell {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 14px 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+body.woman .sc-cell {
+  background: rgba(232,99,154,0.04);
+  border-color: rgba(232,99,154,0.10);
+}
+
+.sc-cell .lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
+}
+body.woman .sc-cell .lbl { color: rgba(58,16,32,0.55); }
+.sc-cell .val {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--text, #fff);
+}
+body.woman .sc-cell .val { color: #3A1020; }
+
+/* Progress bar */
+.sc-bar {
+  margin-top: 10px;
+  height: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+body.woman .sc-bar { background: rgba(232,99,154,0.10); }
+.sc-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bar-color, #fff);
+}
+
+/* Score color thresholds */
+.sc-cell[data-tier="critical"] { --bar-color: linear-gradient(90deg, #ff3344, #ff5560); }
+.sc-cell[data-tier="low"]      { --bar-color: linear-gradient(90deg, #ff6633, #ff8855); }
+.sc-cell[data-tier="medium"]   { --bar-color: linear-gradient(90deg, #ffb000, #ffcc44); }
+.sc-cell[data-tier="good"]     { --bar-color: linear-gradient(90deg, #00cc66, #00e088); }
+.sc-cell[data-tier="excellent"] { --bar-color: linear-gradient(90deg, #00ff8c, #44ffaa); }
+
+/* ═══ POTENTIAL CELL — HIGHLIGHTED ═══ */
+.sc-cell.potential {
+  background: linear-gradient(135deg, rgba(255,215,0,0.10), rgba(255,180,0,0.04));
+  border: 1px solid rgba(255,215,0,0.30);
+  box-shadow: 0 0 0 1px rgba(255,215,0,0.10), 0 8px 24px rgba(255,180,0,0.10);
+  position: relative;
+}
+.sc-cell.potential::before {
+  content: 'GLOW UP';
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.sc-cell.potential .lbl {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+}
+.sc-cell.potential .val {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 60%, #FFD700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.sc-cell.potential .sc-bar { background: rgba(255,215,0,0.12); }
+.sc-cell.potential .sc-bar .fill {
+  background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+  background-size: 200% 100%;
+  animation: shimmerGold 3s ease-in-out infinite;
+}
+@keyframes shimmerGold {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+/* removed +/decoration — was visually distracting */
+
+/* Delta indicator (current → potential) */
+.sc-delta {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.45);
+}
+body.woman .sc-delta { color: rgba(58,16,32,0.5); }
+.sc-cell.potential .sc-delta {
+  color: #FFD700;
+  font-weight: 800;
+}
+
+/* CTA below scores */
+.sc-cta {
+  margin-top: 20px;
+  display: block;
+  width: 100%;
+  padding: 16px;
+  background: var(--text, #fff);
+  color: var(--bg, #0a0a0a);
+  border: none;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.sc-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+body.woman .sc-cta {
+  background: var(--text, #3A1020);
+  color: var(--bg, #FFF7F9);
+}
+
+/* Compact variant (dashboard widget) */
+.score-card.compact {
+  padding: 16px;
+}
+.score-card.compact .sc-avatar {
+  width: 56px;
+  height: 56px;
+}
+.score-card.compact .sc-grid {
+  gap: 8px;
+}
+.score-card.compact .sc-cell {
+  padding: 10px;
+}
+.score-card.compact .sc-cell .val {
+  font-size: 24px;
+}

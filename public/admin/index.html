@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel — Maxlook</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',-apple-system,sans-serif;
+  background:#0a0a0a;
+  color:#fff;
+  min-height:100vh;
+}
+
+/* Header */
+.header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 28px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(8px);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.brand { display:flex; align-items:center; gap:10px; }
+.brand .logo {
+  width:36px; height:36px; border-radius:8px;
+  background:linear-gradient(135deg,#E8639A,#FF0000);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:14px;
+}
+.brand .name { font-weight:800; font-size:14px; }
+.nav { display:flex; gap:20px; }
+.nav a {
+  color:rgba(255,255,255,0.7);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:500;
+}
+.nav a:hover { color:#fff; }
+.nav .logout {
+  background:none;
+  border:none;
+  color:rgba(255,255,255,0.7);
+  cursor:pointer;
+  font-size:13px;
+  font-weight:500;
+  font-family:inherit;
+}
+.nav .logout:hover { color:#ff6633; }
+
+/* Container */
+.container { max-width:1280px; margin:0 auto; padding:24px 28px; }
+
+/* Toast */
+.toast {
+  position:fixed;
+  top:80px;
+  left:50%;
+  transform:translateX(-50%) translateY(-20px);
+  padding:12px 20px;
+  border-radius:10px;
+  font-size:13px;
+  font-weight:600;
+  z-index:100;
+  opacity:0;
+  pointer-events:none;
+  transition:all 0.25s;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.success { background:rgba(0,224,96,0.18); color:#00e060; border:1px solid rgba(0,224,96,0.35); }
+.toast.error { background:rgba(255,0,0,0.18); color:#ff6633; border:1px solid rgba(255,0,0,0.35); }
+.toast.info { background:rgba(232,99,154,0.18); color:#E8639A; border:1px solid rgba(232,99,154,0.35); }
+
+/* Stats grid */
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:14px;
+  margin-bottom:24px;
+}
+.stat {
+  background:linear-gradient(145deg,#141414,#0a0a0a);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  padding:18px 20px;
+}
+.stat .lbl {
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.45);
+  margin-bottom:8px;
+}
+.stat .num {
+  font-size:32px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+  font-variant-numeric:tabular-nums;
+}
+.stat.total .num { color:#fff; }
+.stat.active .num { color:#00e060; }
+.stat.pending .num { color:#ffb000; }
+.stat.activated .num { color:#E8639A; }
+.stat.suspended .num { color:#ff6633; }
+.stat.expired .num { color:rgba(255,255,255,0.3); }
+
+/* Card */
+.card {
+  background:linear-gradient(145deg,#141414,#0a0a0a);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:24px 28px;
+  margin-bottom:20px;
+}
+.card h2 {
+  font-size:16px;
+  font-weight:800;
+  margin-bottom:6px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.card .desc {
+  font-size:13px;
+  color:rgba(255,255,255,0.5);
+  margin-bottom:20px;
+}
+
+/* Form */
+.form-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+@media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
+.field label {
+  display:block;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.55);
+  margin-bottom:5px;
+}
+.field input, .field select, .field textarea {
+  width:100%;
+  padding:10px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  color:#fff;
+  font-size:13px;
+  font-family:inherit;
+}
+.field textarea { resize:vertical; min-height:60px; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline:none;
+  border-color:#E8639A;
+}
+.btn {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 18px;
+  border:none;
+  border-radius:8px;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+  transition:transform 0.1s, opacity 0.15s;
+}
+.btn:active { transform:scale(0.97); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.btn.primary {
+  background:linear-gradient(135deg,#E8639A,#B03070);
+  color:#fff;
+}
+.btn.warn { background:#ffb000; color:#1a1a1a; }
+.btn.danger { background:#ff3344; color:#fff; }
+.btn.ghost {
+  background:rgba(255,255,255,0.06);
+  color:#fff;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.btn.sm { padding:6px 10px; font-size:11px; }
+
+/* Filter row */
+.filters {
+  display:flex;
+  gap:10px;
+  margin-bottom:16px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.filters input, .filters select {
+  padding:8px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
+  color:#fff;
+  font-size:13px;
+  font-family:inherit;
+}
+.filters input { flex:1; min-width:200px; }
+
+/* Table */
+.table-wrap { overflow-x:auto; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+thead th {
+  text-align:left;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.5);
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  white-space:nowrap;
+}
+tbody td {
+  padding:10px 12px;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+  vertical-align:middle;
+}
+tbody tr:hover { background:rgba(255,255,255,0.02); }
+
+/* Token cell */
+.tok {
+  font-family:'SF Mono',Consolas,monospace;
+  font-size:11px;
+  color:#E8639A;
+  font-weight:700;
+  letter-spacing:0.02em;
+}
+
+/* Cust cell */
+.cust .name { font-weight:700; font-size:13px; }
+.cust .em { font-size:11px; color:rgba(255,255,255,0.55); }
+
+/* Status badge */
+.badge {
+  display:inline-block;
+  padding:3px 8px;
+  border-radius:50px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:0.05em;
+}
+.badge.pending { background:rgba(255,176,0,0.18); color:#ffb000; }
+.badge.activated { background:rgba(232,99,154,0.18); color:#E8639A; }
+.badge.active { background:rgba(0,224,96,0.18); color:#00e060; }
+.badge.suspended { background:rgba(255,51,68,0.18); color:#ff3344; }
+.badge.expired { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.5); }
+.badge.man { background:rgba(0,200,255,0.15); color:#00c8ff; }
+.badge.woman { background:rgba(232,99,154,0.18); color:#E8639A; }
+.badge.email-sent { background:rgba(0,224,96,0.12); color:#00e060; }
+.badge.email-failed { background:rgba(255,51,68,0.12); color:#ff3344; }
+.badge.email-pending { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5); }
+
+/* Action buttons in table */
+.actions { display:flex; gap:6px; flex-wrap:wrap; }
+
+/* Empty state */
+.empty {
+  text-align:center;
+  padding:40px 20px;
+  color:rgba(255,255,255,0.4);
+  font-size:13px;
+}
+
+/* Banner */
+.banner {
+  padding:12px 16px;
+  border-radius:10px;
+  font-size:13px;
+  margin-bottom:16px;
+  display:none;
+}
+.banner.show { display:block; }
+.banner.warn {
+  background:rgba(255,176,0,0.08);
+  border:1px solid rgba(255,176,0,0.25);
+  color:#ffb000;
+}
+
+/* Modal */
+.modal-bg {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.7);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+  padding:20px;
+}
+.modal-bg.show { display:flex; }
+.modal {
+  background:#141414;
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:16px;
+  padding:28px;
+  max-width:500px;
+  width:100%;
+  max-height:90vh;
+  overflow-y:auto;
+}
+.modal h3 { font-size:16px; font-weight:800; margin-bottom:12px; }
+.modal .body { font-size:13px; color:rgba(255,255,255,0.7); margin-bottom:18px; line-height:1.6; }
+.modal .footer { display:flex; gap:10px; justify-content:flex-end; }
+.kv {
+  background:rgba(255,255,255,0.03);
+  border-radius:8px;
+  padding:10px 14px;
+  margin:8px 0;
+  font-size:12px;
+}
+.kv .k { color:rgba(255,255,255,0.45); margin-right:6px; }
+.kv .v { font-family:'SF Mono',Consolas,monospace; color:#E8639A; font-weight:700; word-break:break-all; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">
+    <div class="logo">M</div>
+    <div class="name">Maxlook Admin</div>
+  </div>
+  <div class="nav">
+    <a href="/admin">Dashboard</a>
+    <button class="logout" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="toast" id="toast"></div>
+
+  <div class="banner warn" id="emailWarn">
+    ⚠️ <strong>RESEND_API_KEY belum di-set</strong> di .env. Email aktivasi tidak akan terkirim. Set API key dari <a href="https://resend.com" target="_blank" style="color:inherit;">resend.com</a> dan restart server.
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="stats">
+    <div class="stat total"><div class="lbl">Total Users</div><div class="num" id="s-total">—</div></div>
+    <div class="stat active"><div class="lbl">Active</div><div class="num" id="s-active">—</div></div>
+    <div class="stat activated"><div class="lbl">Activated</div><div class="num" id="s-activated">—</div></div>
+    <div class="stat pending"><div class="lbl">Pending</div><div class="num" id="s-pending">—</div></div>
+    <div class="stat suspended"><div class="lbl">Suspended</div><div class="num" id="s-suspended">—</div></div>
+    <div class="stat expired"><div class="lbl">Expired</div><div class="num" id="s-expired">—</div></div>
+  </div>
+
+  <!-- Create user -->
+  <div class="card">
+    <h2>✨ Generate License Baru</h2>
+    <p class="desc">Sistem otomatis generate token + kirim email aktivasi ke customer.</p>
+    <form id="createForm">
+      <div class="form-grid">
+        <div class="field">
+          <label>Nama Customer</label>
+          <input type="text" name="name" required placeholder="e.g. Nina Sari">
+        </div>
+        <div class="field">
+          <label>Email Customer</label>
+          <input type="email" name="email" required placeholder="customer@example.com">
+        </div>
+        <div class="field">
+          <label>No HP / WhatsApp (opsional)</label>
+          <input type="text" name="phone" placeholder="e.g. +6281234567890">
+        </div>
+        <div class="field">
+          <label>Variant Maxlook</label>
+          <select name="gender" required>
+            <option value="">— Pilih variant —</option>
+            <option value="woman">Maxlook Woman 💖</option>
+            <option value="man">Maxlook Man 🔥</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Notes (opsional)</label>
+        <textarea name="notes" rows="2" placeholder="e.g. Beta tester · paid via BCA · 28 Apr"></textarea>
+      </div>
+      <button type="submit" class="btn primary" id="createBtn">+ Create license + send email</button>
+    </form>
+  </div>
+
+  <!-- Users list -->
+  <div class="card">
+    <h2>📋 Semua License (<span id="usersCount">0</span>)</h2>
+    <p class="desc">Klik action buat suspend / reset device / resend email / delete.</p>
+    <div class="filters">
+      <input type="text" id="searchInput" placeholder="Search nama / email / token / order ID...">
+      <select id="statusFilter">
+        <option value="all">Semua status</option>
+        <option value="pending">Pending</option>
+        <option value="activated">Activated</option>
+        <option value="active">Active</option>
+        <option value="suspended">Suspended</option>
+        <option value="expired">Expired</option>
+      </select>
+      <button class="btn ghost sm" onclick="refresh()">↻ Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Customer</th>
+            <th>Variant</th>
+            <th>Status</th>
+            <th>Email</th>
+            <th>Device</th>
+            <th>Scans</th>
+            <th>Source</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTbody">
+          <tr><td colspan="10" class="empty">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Created Modal -->
+<div class="modal-bg" id="createdModal">
+  <div class="modal">
+    <h3>✅ License berhasil dibuat</h3>
+    <div class="body" id="createdMsg"></div>
+    <div class="kv"><span class="k">Token:</span><span class="v" id="createdToken"></span></div>
+    <div class="kv"><span class="k">Access Link:</span><span class="v" id="createdLink"></span></div>
+    <div class="footer">
+      <button class="btn ghost sm" onclick="copyLink()">📋 Copy Link</button>
+      <button class="btn primary sm" onclick="closeCreated()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let allUsers = [];
+let emailConfigured = false;
+
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function escape(s) {
+  return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+async function logout() {
+  await fetch('/admin/logout', { method: 'POST' });
+  window.location.href = '/admin/login';
+}
+
+async function loadStats() {
+  const res = await fetch('/admin/api/stats');
+  if (res.status === 401) { window.location.href = '/admin/login'; return; }
+  const data = await res.json();
+  document.getElementById('s-total').textContent = data.total;
+  document.getElementById('s-active').textContent = data.active;
+  document.getElementById('s-activated').textContent = data.activated;
+  document.getElementById('s-pending').textContent = data.pending;
+  document.getElementById('s-suspended').textContent = data.suspended;
+  document.getElementById('s-expired').textContent = data.expired;
+  emailConfigured = data.emailConfigured;
+  document.getElementById('emailWarn').classList.toggle('show', !emailConfigured);
+}
+
+async function loadUsers() {
+  const status = document.getElementById('statusFilter').value;
+  const search = document.getElementById('searchInput').value.trim();
+  const params = new URLSearchParams();
+  if (status && status !== 'all') params.set('status', status);
+  if (search) params.set('search', search);
+  const res = await fetch('/admin/api/users?' + params);
+  if (res.status === 401) { window.location.href = '/admin/login'; return; }
+  const data = await res.json();
+  allUsers = data.users || [];
+  document.getElementById('usersCount').textContent = data.total || 0;
+  renderUsers();
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function renderUsers() {
+  const tbody = document.getElementById('usersTbody');
+  if (allUsers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty">Belum ada user. Buat license baru di atas.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allUsers.map(u => {
+    const variant = u.gender === 'woman' ? 'woman' : 'man';
+    const variantLabel = u.gender === 'woman' ? '♀ Woman' : '♂ Man';
+    const status = u.status || 'pending';
+    const emailStatus = u.email_status || 'pending';
+    const emailLabel = emailStatus === 'sent' ? '✓ Sent' : emailStatus === 'failed' ? '✗ Failed' : '— Pending';
+    const isSuspended = status === 'suspended';
+    return `
+      <tr>
+        <td><span class="tok">${escape(u.token)}</span></td>
+        <td class="cust">
+          <div class="name">${escape(u.name)}</div>
+          <div class="em">${escape(u.email||'-')}</div>
+        </td>
+        <td><span class="badge ${variant}">${variantLabel}</span></td>
+        <td><span class="badge ${status}">${status}</span></td>
+        <td><span class="badge email-${emailStatus}">${emailLabel}</span></td>
+        <td>${u.device_id ? '🔒 Bound' : '— Free'}</td>
+        <td>${u.total_scans || 0}</td>
+        <td><span style="font-size:11px;color:rgba(255,255,255,0.5);">${escape(u.source||'-')}</span></td>
+        <td style="font-size:11px;color:rgba(255,255,255,0.5);">${fmtDate(u.created_at)}</td>
+        <td>
+          <div class="actions">
+            ${isSuspended
+              ? `<button class="btn ghost sm" onclick="unsuspend(${u.id})">Unsuspend</button>`
+              : `<button class="btn warn sm" onclick="suspend(${u.id})">Suspend</button>`}
+            <button class="btn ghost sm" onclick="resetDevice(${u.id})">Reset Device</button>
+            <button class="btn ghost sm" onclick="resendEmail(${u.id})">Re-send Email</button>
+            <button class="btn ghost sm" onclick="copyToken('${u.token}')">📋</button>
+            <button class="btn danger sm" onclick="del(${u.id}, '${escape(u.name)}')">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function suspend(id) {
+  if (!confirm('Suspend user ini? Mereka gak bisa akses sampai di-unsuspend.')) return;
+  const res = await fetch(`/admin/api/users/${id}/suspend`, { method: 'POST' });
+  const data = await res.json();
+  if (res.ok) { toast('User di-suspend', 'success'); refresh(); }
+  else toast(data.message || 'Suspend gagal', 'error');
+}
+
+async function unsuspend(id) {
+  const res = await fetch(`/admin/api/users/${id}/unsuspend`, { method: 'POST' });
+  const data = await res.json();
+  if (res.ok) { toast('User di-unsuspend', 'success'); refresh(); }
+  else toast(data.message || 'Unsuspend gagal', 'error');
+}
+
+async function resetDevice(id) {
+  if (!confirm('Reset device binding? Next login dari device manapun akan rebind otomatis.')) return;
+  const res = await fetch(`/admin/api/users/${id}/reset-device`, { method: 'POST' });
+  const data = await res.json();
+  if (res.ok) { toast('Device di-reset', 'success'); refresh(); }
+  else toast(data.message || 'Reset device gagal', 'error');
+}
+
+async function resendEmail(id) {
+  const res = await fetch(`/admin/api/users/${id}/resend-email`, { method: 'POST' });
+  const data = await res.json();
+  if (res.ok && data.ok) { toast('Email re-sent', 'success'); refresh(); }
+  else toast(data.email?.error || data.message || 'Resend email gagal', 'error');
+}
+
+async function del(id, name) {
+  if (!confirm(`HAPUS user "${name}"? Semua scan history mereka juga akan ke-cascade delete. Aksi ini gak bisa di-undo.`)) return;
+  const res = await fetch(`/admin/api/users/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (res.ok) { toast('User dihapus', 'success'); refresh(); }
+  else toast(data.message || 'Delete gagal', 'error');
+}
+
+function copyToken(token) {
+  navigator.clipboard.writeText(token);
+  toast('Token di-copy: ' + token, 'info');
+}
+
+let currentLink = '';
+function copyLink() {
+  navigator.clipboard.writeText(currentLink);
+  toast('Link di-copy', 'info');
+}
+
+function closeCreated() {
+  document.getElementById('createdModal').classList.remove('show');
+}
+
+document.getElementById('createForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating...';
+  const fd = new FormData(e.target);
+  const body = Object.fromEntries(fd);
+  try {
+    const res = await fetch('/admin/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      e.target.reset();
+      currentLink = data.accessLink;
+      document.getElementById('createdToken').textContent = data.user.token;
+      document.getElementById('createdLink').textContent = data.accessLink;
+      const emailMsg = data.email?.ok
+        ? `✉️ Email aktivasi terkirim ke <strong>${escape(body.email)}</strong>`
+        : `⚠️ Email gagal terkirim: ${escape(data.email?.error || 'unknown error')}`;
+      document.getElementById('createdMsg').innerHTML = emailMsg;
+      document.getElementById('createdModal').classList.add('show');
+      refresh();
+    } else {
+      toast(data.message || 'Create gagal', 'error');
+    }
+  } catch (err) {
+    toast('Network error: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '+ Create license + send email';
+  }
+});
+
+document.getElementById('searchInput').addEventListener('input', debounce(loadUsers, 300));
+document.getElementById('statusFilter').addEventListener('change', loadUsers);
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+async function refresh() {
+  await Promise.all([loadStats(), loadUsers()]);
+}
+
+refresh();
+</script>
+</body>
+</html>

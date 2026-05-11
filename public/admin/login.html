@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login — Maxlook</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Inter',-apple-system,sans-serif;
+  background:linear-gradient(180deg,#0a0a0a,#1a0a14);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  padding:20px;
+}
+.card {
+  width:100%;
+  max-width:400px;
+  background:linear-gradient(145deg,#1a1a1a,#0f0f0f);
+  border:1px solid rgba(232,99,154,0.15);
+  border-radius:16px;
+  padding:36px 32px;
+  box-shadow:0 12px 48px rgba(0,0,0,0.4);
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:28px;
+}
+.brand .logo {
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  background:linear-gradient(135deg,#E8639A,#FF0000);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:18px;
+}
+.brand .name {
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:-0.01em;
+}
+.brand .sub {
+  font-size:11px;
+  color:rgba(255,255,255,0.5);
+  margin-top:1px;
+}
+h1 {
+  font-size:22px;
+  font-weight:800;
+  margin-bottom:6px;
+  letter-spacing:-0.02em;
+}
+.h-sub {
+  font-size:13px;
+  color:rgba(255,255,255,0.5);
+  margin-bottom:24px;
+}
+.field { margin-bottom:14px; }
+.field label {
+  display:block;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,0.6);
+  margin-bottom:6px;
+}
+.field input {
+  width:100%;
+  padding:11px 14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;
+  color:#fff;
+  font-size:14px;
+  font-family:inherit;
+  transition:border 0.15s;
+}
+.field input:focus {
+  outline:none;
+  border-color:#E8639A;
+}
+.btn {
+  width:100%;
+  margin-top:8px;
+  padding:13px;
+  background:linear-gradient(135deg,#E8639A,#B03070);
+  border:none;
+  border-radius:10px;
+  color:#fff;
+  font-weight:800;
+  font-size:14px;
+  cursor:pointer;
+  font-family:inherit;
+  transition:transform 0.1s;
+}
+.btn:active { transform:scale(0.98); }
+.btn:disabled { opacity:0.5; cursor:not-allowed; }
+.error {
+  margin-top:14px;
+  padding:10px 14px;
+  background:rgba(255,0,0,0.08);
+  border:1px solid rgba(255,0,0,0.25);
+  border-radius:8px;
+  color:#ff6633;
+  font-size:13px;
+  display:none;
+}
+.error.show { display:block; }
+.foot {
+  margin-top:20px;
+  text-align:center;
+  font-size:11px;
+  color:rgba(255,255,255,0.35);
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="logo">M</div>
+    <div>
+      <div class="name">Maxlook Admin</div>
+      <div class="sub">License & user management</div>
+    </div>
+  </div>
+  <h1>Login</h1>
+  <p class="h-sub">Akses panel untuk generate token & manage user.</p>
+  <form id="loginForm">
+    <div class="field">
+      <label>Username</label>
+      <input type="text" name="username" required autocomplete="username" autofocus>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" name="password" required autocomplete="current-password">
+    </div>
+    <button type="submit" class="btn" id="submitBtn">Login</button>
+    <div class="error" id="error"></div>
+  </form>
+  <div class="foot">© Maxlook · Admin restricted area</div>
+</div>
+
+<script>
+const form = document.getElementById('loginForm');
+const errorEl = document.getElementById('error');
+const submitBtn = document.getElementById('submitBtn');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  errorEl.classList.remove('show');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Logging in...';
+
+  const fd = new FormData(form);
+  try {
+    const res = await fetch('/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: fd.get('username'),
+        password: fd.get('password')
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      window.location.href = '/admin';
+    } else {
+      errorEl.textContent = data.message || 'Login gagal';
+      errorEl.classList.add('show');
+    }
+  } catch (err) {
+    errorEl.textContent = 'Network error: ' + err.message;
+    errorEl.classList.add('show');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Login';
+  }
+});
+</script>
+</body>
+</html>

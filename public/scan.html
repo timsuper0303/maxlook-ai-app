@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Scan Wajah — Maxlook AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #000;
+  --bg-soft: #0a0a0a;
+  --bg-card: #111111;
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,0.55);
+  --text-faint: rgba(255,255,255,0.30);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.18);
+  --accent: #ffffff;
+  --accent-glow: rgba(255,255,255,0.18);
+  --primary: #FF0000;
+  --primary-glow: rgba(255,0,0,0.35);
+  --success: #00ff8c;
+  --warning: #ffb000;
+  --danger: #ff3344;
+}
+body.woman {
+  --primary: #E8639A;
+  --primary-glow: rgba(232,99,154,0.35);
+  --success: #00A044;
+  --warning: #D4A574;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Top minimal header ─── */
+.top-bar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.top-bar a, .top-bar button { pointer-events: auto; }
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.14); }
+.brand-tag {
+  font-family: 'Playfair Display', serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+/* ─── Container ─── */
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; }
+
+/* Screen visibility */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: block; animation: fadeIn 500ms ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 1: CAMERA — 3:4 framed with anatomical guide
+   ═══════════════════════════════════════════════════════ */
+#screen-camera {
+  display: none;
+  padding: 70px 16px 20px;
+  min-height: 100vh;
+  background: var(--bg);
+}
+#screen-camera.active { display: block; }
+
+.cam-frame {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  margin: 0 auto;
+  aspect-ratio: 3/4;
+  background: #000;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+}
+
+.cam-frame video,
+.cam-frame canvas.face-mesh,
+.cam-frame .demo-bg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.cam-frame video { transform: scaleX(-1); }
+.cam-frame canvas.face-mesh { pointer-events: none; z-index: 2; }
+.cam-frame .demo-bg {
+  background: linear-gradient(135deg, #1a0a14 0%, #0a0a0a 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  color: var(--text-faint);
+  font-size: 13px;
+}
+.cam-frame .demo-bg .ic { font-size: 56px; margin-bottom: 16px; opacity: 0.4; }
+
+/* Subtle vignette */
+.cam-vignette {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Anatomical face guide — full coverage, line-art style */
+.face-guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.face-guide svg { width: 100%; height: 100%; }
+
+/* Face oval stroke — clean white outline */
+.fg-face {
+  fill: none;
+  stroke: rgba(255,255,255,0.75);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.3));
+}
+/* Gold grid lines */
+.fg-grid {
+  fill: none;
+  stroke: rgba(212,175,55,0.85);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 3px rgba(212,175,55,0.5));
+}
+.fg-grid-dot {
+  fill: rgba(212,175,55,0.95);
+  filter: drop-shadow(0 0 4px rgba(212,175,55,0.6));
+}
+.fg-cap {
+  fill: rgba(212,175,55,0.9);
+  filter: drop-shadow(0 0 3px rgba(212,175,55,0.4));
+}
+
+/* Top status pill */
+.cam-top-pill {
+  position: absolute;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 7px 16px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* Bottom realtime status pill */
+.cam-status-pill {
+  position: absolute;
+  bottom: 16px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 9px 16px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.25s;
+}
+.cam-status-pill.ok { background: rgba(0,255,140,0.20); border-color: var(--success); color: var(--success); }
+.cam-status-pill.warn { background: rgba(255,176,0,0.20); border-color: var(--warning); color: var(--warning); }
+.cam-status-pill .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Controls below frame */
+.cam-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  padding: 28px 20px 12px;
+}
+
+/* Quality tips card — below shutter */
+.quality-tips {
+  margin: 8px 16px 24px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+body.woman .quality-tips {
+  background: rgba(232,99,154,0.04);
+  border-color: rgba(232,99,154,0.12);
+}
+.quality-tips .qt-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,0,0,0.85);
+  margin-bottom: 8px;
+}
+body.woman .quality-tips .qt-title { color: rgba(232,99,154,0.95); }
+.quality-tips .qt-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.quality-tips .qt-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 11px;
+  color: rgba(255,255,255,0.78);
+  line-height: 1.45;
+}
+body.woman .quality-tips .qt-list li { color: rgba(58,16,32,0.78); }
+.quality-tips .qt-ic {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #00e08c, #00cc66);
+  color: #000;
+  border-radius: 50%;
+  font-size: 9px;
+  font-weight: 900;
+  margin-top: 1px;
+}
+.cam-side {
+  width: 50px; height: 50px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 50%;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 18px;
+  transition: all 0.15s;
+}
+.cam-side:hover { background: rgba(255,255,255,0.14); }
+.cam-side:active { transform: scale(0.93); }
+
+.cam-shutter {
+  position: relative;
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: transparent;
+  border: 4px solid var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.cam-shutter::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: all 0.15s;
+}
+.cam-shutter:hover::after { background: rgba(255,255,255,0.85); }
+.cam-shutter:active::after { background: var(--primary); transform: scale(0.88); }
+.cam-shutter:disabled { opacity: 0.3; cursor: not-allowed; }
+
+input[type=file] { display: none; }
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 2: PREVIEW + FORM
+   ═══════════════════════════════════════════════════════ */
+#screen-form { padding: 70px 20px 40px; }
+
+.section-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.section-h1 .accent { color: var(--primary); }
+.section-sub { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; }
+
+.preview-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+}
+.preview-frame img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.preview-frame .retake {
+  position: absolute;
+  bottom: 14px; left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 18px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.form-h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.form-h2 .accent { color: var(--primary); }
+.form-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.field label .req { color: var(--danger); margin-left: 3px; }
+.field label .opt {
+  color: var(--text-faint);
+  font-weight: 500;
+  font-size: 9px;
+  margin-left: 6px;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+.field input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.field input::placeholder { color: var(--text-faint); }
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(255,255,255,0.06);
+}
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row .field { margin-bottom: 0; }
+.field-row .field input[type=number] { -moz-appearance: textfield; }
+.field-row .field input::-webkit-outer-spin-button,
+.field-row .field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 8px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  user-select: none;
+  transition: all 0.15s;
+}
+.chip:hover { border-color: var(--text-muted); }
+.chip.selected {
+  background: var(--text);
+  color: var(--bg);
+  border-color: transparent;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 17px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  transition: all 0.15s;
+}
+.btn-primary:hover { background: rgba(255,255,255,0.85); }
+.btn-primary:active { transform: scale(0.99); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 3: SCANNING — Premium scan animation
+   ═══════════════════════════════════════════════════════ */
+#screen-scanning { padding: 70px 20px 40px; }
+
+.scan-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #000;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+}
+.scan-stage .photo {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  filter: brightness(0.7) contrast(1.1);
+}
+.scan-stage .photo-tint {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.5) 100%);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Sweep scan line — thin white glow */
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+  box-shadow: 0 0 20px rgba(255,255,255,0.6), 0 0 40px rgba(255,255,255,0.3);
+  animation: scanSweep 2.5s ease-in-out infinite;
+  z-index: 5;
+}
+@keyframes scanSweep {
+  0%, 100% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  50% { top: 100%; opacity: 1; }
+  60% { opacity: 0; }
+}
+
+/* Landmark dots */
+.scan-landmarks {
+  position: absolute; inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.scan-landmarks svg { width: 100%; height: 100%; }
+
+/* Crosshair brackets */
+.scan-brackets {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  aspect-ratio: 3/4;
+  pointer-events: none;
+  z-index: 4;
+}
+.scan-brackets::before, .scan-brackets::after,
+.scan-brackets > i::before, .scan-brackets > i::after {
+  content: '';
+  position: absolute;
+  width: 22px; height: 22px;
+  border: 2px solid rgba(255,255,255,0.7);
+}
+.scan-brackets::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+.scan-brackets::after { top: 0; right: 0; border-left: none; border-bottom: none; }
+.scan-brackets > i::before { bottom: 0; left: 0; border-right: none; border-top: none; }
+.scan-brackets > i::after { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+/* Status overlay (minimal) */
+.scan-status {
+  position: absolute;
+  top: 20px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 8;
+  padding: 6px 14px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.scan-status::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-right: 8px;
+  box-shadow: 0 0 8px var(--primary);
+  animation: blink 1s ease-in-out infinite;
+  vertical-align: middle;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Progress bottom */
+.scan-progress-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 22px;
+}
+.scan-progress-card .label {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+.substeps {
+  font-size: 12px;
+  line-height: 1.9;
+}
+.substeps .step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 0;
+  opacity: 0.35;
+  transition: opacity 0.4s;
+}
+.substeps .step.active { opacity: 1; font-weight: 700; color: var(--text); }
+.substeps .step.done { opacity: 0.7; }
+.substeps .step .ic { display: inline-flex; width: 14px; height: 14px; align-items: center; justify-content: center; }
+
+.error-msg {
+  margin-top: 14px;
+  padding: 14px 16px;
+  background: rgba(255,51,68,0.10);
+  border: 1px solid rgba(255,51,68,0.30);
+  border-radius: 14px;
+  color: #ff7788;
+  font-size: 12px;
+  line-height: 1.6;
+  display: none;
+}
+.error-msg.show { display: block; }
+.error-msg button {
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: rgba(255,51,68,0.15);
+  border: 1px solid rgba(255,51,68,0.30);
+  border-radius: 10px;
+  color: #ff7788;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@media (max-width: 480px) {
+  .section-h1 { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCREEN 1: CAMERA — 3:4 frame with anatomical guide
+       ═══════════════════════════════════════════════════════ -->
+  <section class="screen active" id="screen-camera">
+    <div class="top-bar" style="position:absolute">
+      <a id="backLink" href="/dashboard" class="icon-btn" style="font-size:14px">←</a>
+      <span class="brand-tag">MAXLOOK</span>
+      <span class="icon-btn" style="visibility:hidden">·</span>
+    </div>
+
+    <div class="cam-frame">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas class="face-mesh" id="faceMesh"></canvas>
+      <div class="demo-bg" id="demoBg">
+        <div class="ic">⏵</div>
+        <div>Mengaktifkan kamera...</div>
+      </div>
+
+      <div class="cam-vignette"></div>
+
+      <!-- Face guide: tight oval + gold proportion grid (calibrated Indonesian face) -->
+      <div class="face-guide">
+        <svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid meet">
+          <!-- ═══ FACE OVAL — calibrated tighter to typical face fit ═══ -->
+          <!-- rx=85 ry=130, center (150,200): width ~57%, height ~65% of frame -->
+          <ellipse class="fg-face" cx="150" cy="200" rx="85" ry="130"/>
+
+          <!-- ═══ GOLD GRID — proportion guide lines ═══ -->
+
+          <!-- Vertical center axis — full oval height -->
+          <line class="fg-grid" x1="150" y1="65" x2="150" y2="335"/>
+          <ellipse class="fg-cap" cx="150" cy="65" rx="3" ry="1.3"/>
+          <ellipse class="fg-cap" cx="150" cy="335" rx="3" ry="1.3"/>
+
+          <!-- Horizontal line 1: Eye level (y=170, ~38% from top of face = ideal eye position) -->
+          <line class="fg-grid" x1="55" y1="170" x2="245" y2="170"/>
+          <circle class="fg-grid-dot" cx="120" cy="170" r="2"/>
+          <circle class="fg-grid-dot" cx="180" cy="170" r="2"/>
+
+          <!-- Horizontal line 2: Nose tip (y=225) -->
+          <line class="fg-grid" x1="95" y1="225" x2="205" y2="225"/>
+          <circle class="fg-grid-dot" cx="115" cy="225" r="1.6"/>
+          <circle class="fg-grid-dot" cx="185" cy="225" r="1.6"/>
+
+          <!-- Horizontal line 3: Mouth (y=265) -->
+          <line class="fg-grid" x1="105" y1="265" x2="195" y2="265"/>
+          <circle class="fg-grid-dot" cx="120" cy="265" r="1.5"/>
+          <circle class="fg-grid-dot" cx="180" cy="265" r="1.5"/>
+        </svg>
+      </div>
+
+      <div class="cam-top-pill">Posisikan wajah · cahaya cukup</div>
+
+      <div class="cam-status-pill warn" id="camFeedback">
+        <span class="dot"></span>
+        <span id="camFeedbackText">Mengaktifkan kamera...</span>
+      </div>
+    </div>
+
+    <div class="cam-controls">
+      <button class="cam-side" onclick="document.getElementById('fileInput').click()" title="Upload file">↑</button>
+      <button class="cam-shutter" id="captureBtn" onclick="captureSelfie()" disabled></button>
+      <button class="cam-side" onclick="restartCamera()" title="Ulang kamera">↻</button>
+    </div>
+
+    <!-- Quality tips — for consistent week-over-week tracking -->
+    <div class="quality-tips">
+      <div class="qt-title">Tips agar hasil scan akurat & konsisten</div>
+      <ul class="qt-list">
+        <li><span class="qt-ic">✓</span> Wajah menghadap depan, dagu sejajar kamera</li>
+        <li><span class="qt-ic">✓</span> Cahaya cukup & merata (hindari shadow di muka)</li>
+        <li><span class="qt-ic">✓</span> Ekspresi netral, mulut tertutup, tanpa senyum</li>
+        <li><span class="qt-ic">✓</span> Rambut tidak menutupi dahi, alis, atau pipi</li>
+        <li><span class="qt-ic">✓</span> Tidak pakai kacamata, masker, atau filter</li>
+      </ul>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp">
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCREEN 2: PREVIEW + FORM
+       ═══════════════════════════════════════════════════════ -->
+  <section class="screen" id="screen-form">
+    <div class="top-bar" style="position:absolute;background:linear-gradient(180deg,#000,transparent)">
+      <button class="icon-btn" onclick="goScreen('camera')" style="font-size:14px">←</button>
+      <span class="brand-tag">MAXLOOK</span>
+      <span class="icon-btn" style="visibility:hidden">·</span>
+    </div>
+
+    <h1 class="section-h1">Info Tentang <span class="accent" id="sapaan1">Lo</span></h1>
+    <p class="section-sub">Bantu AI kasih analisis yang lebih akurat dan personal.</p>
+
+    <div class="preview-frame">
+      <img id="previewImg" alt="Preview">
+      <button class="retake" onclick="goScreen('camera')">↻ Foto Ulang</button>
+    </div>
+
+    <div class="form-card">
+      <h2 class="form-h2">Data <span class="accent" id="sapaan2">Lo</span></h2>
+      <p class="form-desc">Cuma umur yang wajib, sisanya opsional.</p>
+
+      <div class="field">
+        <label>Umur <span class="req">*</span></label>
+        <input type="number" id="age" placeholder="contoh: 24" min="13" max="80" required>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Tinggi <span class="opt">cm · opsional</span></label>
+          <input type="number" id="height" placeholder="170" min="100" max="220">
+        </div>
+        <div class="field">
+          <label>Berat <span class="opt">kg · opsional</span></label>
+          <input type="number" id="weight" placeholder="65" min="30" max="200">
+        </div>
+      </div>
+
+      <!-- Hijab toggle — only shown for woman variant -->
+      <div class="field" id="hijabField" style="display:none">
+        <label>Pakai hijab? <span class="req">*</span></label>
+        <div class="chips" id="hijabChips" style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="chip" data-hijab="yes">Iya, pakai hijab</div>
+          <div class="chip" data-hijab="no">Tidak / lepas</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Goals Glow Up <span class="opt">opsional · multi-pilih</span></label>
+        <div class="chips" id="goalsChips">
+          <div class="chip" data-goal="jawline">Sharp Jawline</div>
+          <div class="chip" data-goal="glass-skin">Glass Skin</div>
+          <div class="chip" data-goal="clear-skin">Clear Skin</div>
+          <div class="chip" data-goal="dark-circles">No Dark Circles</div>
+          <div class="chip" data-goal="anti-aging">Anti-Aging</div>
+          <div class="chip" data-goal="symmetry">Symmetry</div>
+          <div class="chip" data-goal="color-style">Personal Color</div>
+          <div class="chip" data-goal="overall">Overall Glow</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="submitBtn" onclick="submitScan()">Analisis Sekarang →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SCREEN 3: SCANNING
+       ═══════════════════════════════════════════════════════ -->
+  <section class="screen" id="screen-scanning">
+    <div class="top-bar" style="position:absolute;background:linear-gradient(180deg,#000,transparent)">
+      <span class="icon-btn" style="visibility:hidden">·</span>
+      <span class="brand-tag">MAXLOOK · SCANNING</span>
+      <span class="icon-btn" style="visibility:hidden">·</span>
+    </div>
+
+    <div class="scan-stage">
+      <img class="photo" id="scanPhoto" alt="">
+      <div class="photo-tint"></div>
+      <div class="scan-landmarks" id="scanLandmarks"></div>
+      <div class="scan-brackets"><i></i></div>
+      <div class="scan-line"></div>
+      <div class="scan-status">ANALYZING 50+ ASPECTS</div>
+    </div>
+
+    <div class="scan-progress-card">
+      <div class="label" id="scanStatusTtl">AI sedang menganalisis...</div>
+      <div class="substeps">
+        <div class="step active" data-step="upload"><span class="ic">●</span> Upload foto ke server</div>
+        <div class="step" data-step="vision"><span class="ic">○</span> AI vision scan</div>
+        <div class="step" data-step="zones"><span class="ic">○</span> Detect 12 face zones</div>
+        <div class="step" data-step="concerns"><span class="ic">○</span> Analisa 50+ concerns</div>
+        <div class="step" data-step="color"><span class="ic">○</span> Personal color analysis</div>
+        <div class="step" data-step="recommend"><span class="ic">○</span> Generate rekomendasi</div>
+      </div>
+      <div class="error-msg" id="scanErrorMsg">
+        <div id="scanErrorText"></div>
+        <button onclick="goScreen('form')">↻ Coba Lagi</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js" defer></script>
+<script>
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+const token = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('maxlook_token');
+if (!token) window.location.href = '/';
+document.getElementById('backLink').href = '/dashboard?token=' + encodeURIComponent(token);
+
+let user = null;
+let videoStream = null;
+let detectionRAF = null;
+let faceModelsLoaded = false;
+let capturedPhotoBlob = null;
+let capturedLandmarks = null;
+let capturedFaceBox = null;
+let selectedGoals = [];
+
+async function init() {
+  const res = await fetch('/api/me', { headers: { 'X-Maxlook-Token': token } });
+  if (!res.ok) { window.location.href = '/'; return; }
+  const data = await res.json();
+  user = data.user;
+  document.body.classList.toggle('woman', user.gender === 'woman');
+  const sapaan = user.gender === 'woman' ? 'Kamu' : 'Lo';
+  ['sapaan1', 'sapaan2'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = sapaan;
+  });
+
+  // Show hijab field for woman variant
+  if (user.gender === 'woman') {
+    const hf = document.getElementById('hijabField');
+    if (hf) hf.style.display = '';
+  }
+
+  if (!data.canScan) {
+    document.getElementById('screen-camera').innerHTML = `
+      <div style="padding:80px 24px;text-align:center;color:var(--text)">
+        <div style="font-size:54px;margin-bottom:14px;">⏳</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px;">Re-scan Locked</h2>
+        <p style="font-size:14px;color:var(--text-muted);margin-bottom:8px;">Available 7 hari setelah scan terakhir.</p>
+        <p style="font-size:14px;">Next: <strong>${new Date(data.nextScanAt).toLocaleString('id-ID')}</strong></p>
+        <a href="/dashboard?token=${encodeURIComponent(token)}" class="btn-primary" style="display:inline-block;margin-top:14px;text-decoration:none;width:auto;padding:14px 32px">← Kembali</a>
+      </div>`;
+    return;
+  }
+
+  startCamera();
+}
+
+// ── CAMERA ───────────────────────────────────────────────
+async function startCamera() {
+  const fb = document.getElementById('camFeedback');
+  const fbT = document.getElementById('camFeedbackText');
+  fbT.textContent = 'Mengaktifkan kamera...';
+  fb.className = 'cam-status-pill warn';
+
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } }
+    });
+    document.getElementById('video').srcObject = videoStream;
+    document.getElementById('demoBg').style.display = 'none';
+    document.getElementById('captureBtn').disabled = false;
+    fbT.textContent = 'Posisikan wajah';
+    fb.className = 'cam-status-pill';
+
+    if (typeof faceapi !== 'undefined' && !faceModelsLoaded) {
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        faceModelsLoaded = true;
+      } catch (e) { console.warn('[face-api]', e.message); }
+    }
+    if (faceModelsLoaded) startLiveDetection();
+  } catch (err) {
+    console.warn('[camera]', err.message);
+    fbT.textContent = 'Kamera tidak tersedia · Upload File';
+    fb.className = 'cam-status-pill warn';
+  }
+}
+
+function stopCamera() {
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  if (detectionRAF) { cancelAnimationFrame(detectionRAF); detectionRAF = null; }
+}
+
+function restartCamera() {
+  stopCamera();
+  document.getElementById('demoBg').style.display = 'flex';
+  document.getElementById('captureBtn').disabled = true;
+  startCamera();
+}
+
+function startLiveDetection() {
+  const video = document.getElementById('video');
+  const fb = document.getElementById('camFeedback');
+  const fbT = document.getElementById('camFeedbackText');
+
+  const detect = async () => {
+    if (video.readyState >= 2 && faceModelsLoaded) {
+      try {
+        const det = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }));
+        if (det) {
+          const cxR = (det.box.x + det.box.width / 2) / video.videoWidth;
+          const cyR = (det.box.y + det.box.height / 2) / video.videoHeight;
+          const sizeR = det.box.width / video.videoWidth;
+          let status = 'ok', msg = 'Wajah pas · Tekan tombol';
+          if (sizeR < 0.30) { status = 'warn'; msg = 'Mendekat ke kamera'; }
+          else if (sizeR > 0.65) { status = 'warn'; msg = 'Menjauh dari kamera'; }
+          else if (Math.abs(cxR - 0.5) > 0.15) { status = 'warn'; msg = 'Geser ke tengah'; }
+          else if (Math.abs(cyR - 0.5) > 0.15) { status = 'warn'; msg = 'Sejajarkan vertikal'; }
+          fb.className = 'cam-status-pill ' + status;
+          fbT.textContent = msg;
+        } else {
+          fb.className = 'cam-status-pill warn';
+          fbT.textContent = 'Wajah belum terdeteksi';
+        }
+      } catch (e) {}
+    }
+    detectionRAF = requestAnimationFrame(detect);
+  };
+  detect();
+}
+
+async function captureSelfie() {
+  const video = document.getElementById('video');
+  if (!video.videoWidth) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(-1, 1);
+  ctx.translate(-canvas.width, 0);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  try {
+    if (faceModelsLoaded) {
+      const det = await faceapi
+        .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
+        .withFaceLandmarks();
+      if (det) {
+        capturedLandmarks = det.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
+        capturedFaceBox = {
+          x: det.detection.box.x, y: det.detection.box.y,
+          width: det.detection.box.width, height: det.detection.box.height,
+          imgWidth: canvas.width, imgHeight: canvas.height
+        };
+      }
+    }
+  } catch (e) { console.warn('[capture]', e.message); }
+
+  canvas.toBlob(blob => {
+    capturedPhotoBlob = blob;
+    document.getElementById('previewImg').src = URL.createObjectURL(blob);
+    stopCamera();
+    goScreen('form');
+  }, 'image/jpeg', 0.9);
+}
+
+document.getElementById('fileInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 8 * 1024 * 1024) { alert('File terlalu besar. Max 8MB.'); return; }
+  capturedPhotoBlob = file;
+
+  try {
+    if (faceModelsLoaded) {
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      await new Promise(res => { img.onload = res; });
+      const det = await faceapi
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
+        .withFaceLandmarks();
+      if (det) {
+        capturedLandmarks = det.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
+        capturedFaceBox = {
+          x: det.detection.box.x, y: det.detection.box.y,
+          width: det.detection.box.width, height: det.detection.box.height,
+          imgWidth: img.naturalWidth, imgHeight: img.naturalHeight
+        };
+      }
+    }
+  } catch (err) { console.warn('[upload-detect]', err.message); }
+
+  document.getElementById('previewImg').src = URL.createObjectURL(file);
+  stopCamera();
+  goScreen('form');
+});
+
+document.querySelectorAll('#goalsChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    chip.classList.toggle('selected');
+    selectedGoals = [...document.querySelectorAll('#goalsChips .chip.selected')].map(c => c.dataset.goal);
+  });
+});
+
+// Hijab single-select
+let wearsHijab = null;
+document.querySelectorAll('#hijabChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#hijabChips .chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    wearsHijab = chip.dataset.hijab === 'yes';
+  });
+});
+
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'camera') startCamera();
+  if (name === 'scanning') {
+    document.querySelectorAll('.substeps .step').forEach((s, i) => {
+      s.classList.remove('done');
+      s.classList.toggle('active', i === 0);
+      const ic = s.querySelector('.ic'); if (ic) ic.textContent = i === 0 ? '●' : '○';
+    });
+    const errEl = document.getElementById('scanErrorMsg');
+    if (errEl) errEl.classList.remove('show');
+    document.getElementById('scanStatusTtl').textContent = 'AI sedang menganalisis...';
+  }
+}
+
+async function submitScan() {
+  const age = document.getElementById('age').value;
+  if (!age) { showError('Umur wajib diisi'); return; }
+  const height = document.getElementById('height').value;
+  const weight = document.getElementById('weight').value;
+  if (!capturedPhotoBlob) { showError('Foto belum di-capture'); return; }
+
+  // Hijab field — required for woman variant
+  if (user.gender === 'woman' && wearsHijab === null) {
+    showError('Pilih dulu: pakai hijab atau tidak');
+    return;
+  }
+
+  // Save photo to sessionStorage so result page can show it as profile avatar
+  try {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        sessionStorage.setItem('maxlook_last_scan_photo', reader.result);
+        // Also try localStorage as backup (survives tab close)
+        localStorage.setItem('maxlook_last_scan_photo', reader.result);
+      } catch (e) {
+        console.warn('[scan] storage quota exceeded, skipping photo cache');
+      }
+    };
+    reader.readAsDataURL(capturedPhotoBlob);
+  } catch (e) { console.warn('[scan] photo cache failed:', e.message); }
+
+  document.getElementById('scanPhoto').src = URL.createObjectURL(capturedPhotoBlob);
+  renderScanLandmarks();
+  goScreen('scanning');
+  animateSteps();
+
+  const formData = new FormData();
+  formData.append('selfie', capturedPhotoBlob, 'selfie.jpg');
+  formData.append('age', age);
+  if (height) formData.append('height', height);
+  if (weight) formData.append('weight', weight);
+  if (wearsHijab !== null) formData.append('wears_hijab', wearsHijab ? '1' : '0');
+  if (selectedGoals.length) formData.append('goals', JSON.stringify(selectedGoals));
+  if (capturedLandmarks) formData.append('face_landmarks', JSON.stringify(capturedLandmarks));
+  if (capturedFaceBox) formData.append('face_box', JSON.stringify(capturedFaceBox));
+
+  try {
+    const res = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'X-Maxlook-Token': token },
+      body: formData
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showScanError(data.message || data.error || 'Scan gagal — coba lagi');
+      return;
+    }
+    if (!data?.scan?.id) {
+      showScanError('AI berhasil scan, tapi data tidak lengkap. Coba scan ulang.');
+      return;
+    }
+
+    completeAllSteps();
+    document.getElementById('scanStatusTtl').textContent = '✓ Analisis selesai';
+    setTimeout(() => {
+      window.location.href = `/result?id=${data.scan.id}&token=${encodeURIComponent(token)}`;
+    }, 1200);
+
+  } catch (err) {
+    console.error('[scan] Network error:', err);
+    showScanError('Network error: ' + err.message);
+  }
+}
+
+function renderScanLandmarks() {
+  const container = document.getElementById('scanLandmarks');
+  if (!container || !capturedLandmarks || !capturedFaceBox) {
+    container.innerHTML = '';
+    return;
+  }
+  const W = capturedFaceBox.imgWidth || 720;
+  const H = capturedFaceBox.imgHeight || 960;
+  const dots = capturedLandmarks.map((p, i) => {
+    const cx = (p.x / W) * 100;
+    const cy = (p.y / H) * 100;
+    const delay = (i / capturedLandmarks.length) * 1.5;
+    return `<circle cx="${cx}%" cy="${cy}%" r="2" fill="rgba(255,255,255,0.9)" opacity="0">
+      <animate attributeName="opacity" values="0;0.9;0" dur="2s" begin="${delay}s" repeatCount="indefinite"/>
+    </circle>`;
+  }).join('');
+  container.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">${dots}</svg>`;
+}
+
+function animateSteps() {
+  const steps = document.querySelectorAll('.substeps .step');
+  let idx = 0;
+  const interval = setInterval(() => {
+    if (idx >= steps.length - 1) { clearInterval(interval); return; }
+    steps[idx].classList.remove('active');
+    steps[idx].classList.add('done');
+    steps[idx].querySelector('.ic').textContent = '✓';
+    idx++;
+    steps[idx].classList.add('active');
+    steps[idx].querySelector('.ic').textContent = '●';
+  }, 3000);
+}
+
+function completeAllSteps() {
+  document.querySelectorAll('.substeps .step').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('done');
+    s.querySelector('.ic').textContent = '✓';
+  });
+}
+
+function showError(msg) { alert(msg); }
+function showScanError(msg) {
+  document.getElementById('scanStatusTtl').textContent = 'Scan gagal';
+  const errEl = document.getElementById('scanErrorMsg');
+  document.getElementById('scanErrorText').textContent = msg;
+  errEl.classList.add('show');
+}
+
+init();
+</script>
+</body>
+</html>

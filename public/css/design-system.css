@@ -1,0 +1,423 @@
+/* ═══════════════════════════════════════════════════════
+   Maxlook Design System v1
+   Single source of truth untuk colors, spacing, typography, motion
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Brand: Maxlook MAN (default) ── */
+  --m-primary: #FF0000;
+  --m-primary-dark: #B30000;
+  --m-primary-glow: rgba(255, 0, 0, 0.35);
+  --m-accent: #ff6633;
+  --m-accent-glow: rgba(255, 102, 51, 0.35);
+  --m-success: #00ff8c;
+  --m-success-glow: rgba(0, 255, 140, 0.35);
+  --m-warning: #ffb000;
+  --m-danger: #ff3344;
+
+  --m-bg-base: #0a0a0a;
+  --m-bg-tint: #1a0a0a;
+  --m-bg-card: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+  --m-bg-elevated: linear-gradient(145deg, #1f1f1f, #131313);
+  --m-bg-overlay: rgba(255, 0, 0, 0.06);
+
+  --m-border: rgba(255, 255, 255, 0.08);
+  --m-border-strong: rgba(255, 0, 0, 0.20);
+
+  --m-text-primary: #ffffff;
+  --m-text-secondary: rgba(255, 255, 255, 0.75);
+  --m-text-muted: rgba(255, 255, 255, 0.55);
+  --m-text-faint: rgba(255, 255, 255, 0.35);
+
+  --m-gradient-hero: linear-gradient(135deg, #FF0000 0%, #ff6633 100%);
+  --m-gradient-glow: linear-gradient(135deg, rgba(255,0,0,0.20), rgba(255,102,51,0.20));
+  --m-gradient-success: linear-gradient(135deg, #00ff8c 0%, #00e060 100%);
+}
+
+/* ── Brand: Maxlook WOMAN (override via .woman class on root) ── */
+.woman, [data-variant="woman"] {
+  --m-primary: #E8639A;
+  --m-primary-dark: #B03070;
+  --m-primary-glow: rgba(232, 99, 154, 0.35);
+  --m-accent: #FADADD;
+  --m-accent-glow: rgba(250, 218, 221, 0.35);
+  --m-success: #00A044;
+  --m-success-glow: rgba(0, 224, 96, 0.35);
+  --m-warning: #D4A574;
+  --m-danger: #ff3344;
+
+  --m-bg-base: #FFF5F7;
+  --m-bg-tint: #FADADD;
+  --m-bg-card: #ffffff;
+  --m-bg-elevated: linear-gradient(145deg, #ffffff, #FFF5F7);
+  --m-bg-overlay: rgba(232, 99, 154, 0.06);
+
+  --m-border: rgba(232, 99, 154, 0.15);
+  --m-border-strong: rgba(232, 99, 154, 0.30);
+
+  --m-text-primary: #3A1020;
+  --m-text-secondary: rgba(58, 16, 32, 0.75);
+  --m-text-muted: rgba(58, 16, 32, 0.55);
+  --m-text-faint: rgba(58, 16, 32, 0.35);
+
+  --m-gradient-hero: linear-gradient(135deg, #E8639A 0%, #B03070 100%);
+  --m-gradient-glow: linear-gradient(135deg, rgba(232,99,154,0.20), rgba(212,165,116,0.20));
+  --m-gradient-success: linear-gradient(135deg, #00A044 0%, #00ff8c 100%);
+}
+
+/* ── Severity colors (for facial concerns) ── */
+:root {
+  --sev-severe: #ff3344;
+  --sev-severe-bg: rgba(255, 51, 68, 0.12);
+  --sev-severe-glow: rgba(255, 51, 68, 0.50);
+  --sev-moderate: #ffb000;
+  --sev-moderate-bg: rgba(255, 176, 0, 0.12);
+  --sev-moderate-glow: rgba(255, 176, 0, 0.50);
+  --sev-mild: #00e060;
+  --sev-mild-bg: rgba(0, 224, 96, 0.12);
+  --sev-mild-glow: rgba(0, 224, 96, 0.50);
+}
+
+/* ── Spacing scale (8pt grid) ── */
+:root {
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-20: 80px;
+}
+
+/* ── Typography ── */
+:root {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'SF Mono', Consolas, 'Courier New', monospace;
+
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 22px;
+  --fs-3xl: 28px;
+  --fs-4xl: 36px;
+  --fs-5xl: 48px;
+  --fs-6xl: 64px;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.65;
+  --lh-loose: 1.85;
+}
+
+/* ── Border radius ── */
+:root {
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --r-2xl: 24px;
+  --r-pill: 9999px;
+}
+
+/* ── Shadows ── */
+:root {
+  --sh-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --sh-md: 0 6px 24px rgba(0, 0, 0, 0.12);
+  --sh-lg: 0 12px 48px rgba(0, 0, 0, 0.18);
+  --sh-glow: 0 0 24px var(--m-primary-glow);
+  --sh-glow-strong: 0 0 48px var(--m-primary-glow);
+}
+
+/* ── Motion (transitions + animations) ── */
+:root {
+  --motion-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL RESET + BASE
+   ═══════════════════════════════════════════════════════ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-normal);
+  color: var(--m-text-primary);
+  background: var(--m-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body { min-height: 100vh; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.02em;
+}
+
+a { color: var(--m-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button { font-family: inherit; cursor: pointer; }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS (reusable keyframes)
+   ═══════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 var(--m-primary-glow); }
+  50%      { box-shadow: 0 0 0 12px transparent; }
+}
+
+@keyframes pulseRing {
+  0%   { transform: scale(0.95); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes glow {
+  0%, 100% { filter: drop-shadow(0 0 8px var(--m-primary-glow)); }
+  50%      { filter: drop-shadow(0 0 16px var(--m-primary)); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-3deg); }
+  75%      { transform: rotate(3deg); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes drawLine {
+  from { stroke-dashoffset: var(--draw-length, 1000); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes countUp {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+@keyframes arrowBob {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(6px); }
+}
+
+/* Animation utility classes */
+.anim-fade-in   { animation: fadeIn 400ms ease-out both; }
+.anim-fade-up   { animation: fadeInUp 500ms ease-out both; }
+.anim-fade-down { animation: fadeInDown 500ms ease-out both; }
+.anim-scale-in  { animation: scaleIn 400ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-pulse     { animation: pulse 2s ease-in-out infinite; }
+.anim-glow      { animation: glow 2.5s ease-in-out infinite; }
+.anim-float     { animation: float 3s ease-in-out infinite; }
+.anim-bounce    { animation: bounce 1.5s ease-in-out infinite; }
+
+.anim-delay-1 { animation-delay: 100ms; }
+.anim-delay-2 { animation-delay: 200ms; }
+.anim-delay-3 { animation-delay: 300ms; }
+.anim-delay-4 { animation-delay: 400ms; }
+.anim-delay-5 { animation-delay: 500ms; }
+
+/* "Glow ring" — pulse hint for clickable items */
+.glow-hint {
+  position: relative;
+  isolation: isolate;
+}
+.glow-hint::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid var(--m-primary);
+  opacity: 0;
+  animation: pulseRing 2s ease-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* "Click me" arrow indicator */
+.click-arrow {
+  display: inline-block;
+  animation: arrowBob 1.2s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPONENT PRIMITIVES
+   ═══════════════════════════════════════════════════════ */
+
+.card {
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-radius: var(--r-2xl);
+  padding: var(--sp-6);
+  box-shadow: var(--sh-md);
+}
+
+.card-elevated {
+  background: var(--m-bg-elevated);
+  border: 1px solid var(--m-border-strong);
+  border-radius: var(--r-2xl);
+  padding: var(--sp-8);
+  box-shadow: var(--sh-lg);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-6);
+  border: none;
+  border-radius: var(--r-pill);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform var(--motion-fast), box-shadow var(--motion-base);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--m-gradient-hero);
+  color: #fff;
+  box-shadow: var(--sh-glow);
+}
+.btn-primary:hover { box-shadow: var(--sh-glow-strong); }
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--m-text-primary);
+  border: 1px solid var(--m-border);
+}
+.woman .btn-ghost { background: rgba(0, 0, 0, 0.04); }
+
+.btn-lg { padding: var(--sp-4) var(--sp-8); font-size: var(--fs-md); }
+.btn-sm { padding: var(--sp-2) var(--sp-4); font-size: var(--fs-sm); }
+
+/* Severity badge */
+.sev-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px var(--sp-2);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.sev-severe   { background: var(--sev-severe-bg);   color: var(--sev-severe); }
+.sev-moderate { background: var(--sev-moderate-bg); color: var(--sev-moderate); }
+.sev-mild     { background: var(--sev-mild-bg);     color: var(--sev-mild); }
+
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, var(--m-bg-overlay) 0%, rgba(255,255,255,0.06) 50%, var(--m-bg-overlay) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+  border-radius: var(--r-md);
+}
+
+/* Section heading */
+.section-h {
+  font-size: var(--fs-3xl);
+  font-weight: 800;
+  margin-bottom: var(--sp-6);
+}
+.section-h .accent { color: var(--m-primary); }
+
+/* Subhead label */
+.subhead {
+  font-size: var(--fs-xs);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--m-text-muted);
+  margin: var(--sp-4) 0 var(--sp-2);
+}
+
+/* Container */
+.container { max-width: 920px; margin: 0 auto; padding: var(--sp-6) var(--sp-5); }
+.container-md { max-width: 720px; margin: 0 auto; padding: var(--sp-6) var(--sp-5); }
+.container-lg { max-width: 1200px; margin: 0 auto; padding: var(--sp-6) var(--sp-5); }
+
+/* Mobile responsive base */
+@media (max-width: 640px) {
+  :root {
+    --fs-3xl: 24px;
+    --fs-4xl: 30px;
+    --fs-5xl: 38px;
+    --fs-6xl: 48px;
+  }
+  .container, .container-md, .container-lg { padding: var(--sp-4) var(--sp-4); }
+}
+
+/* Reduce motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

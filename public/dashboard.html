@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard — Maxlook AI</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="/css/score-card.css" rel="stylesheet">
+<script src="/js/score-card.js" defer></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg: #000;
+  --bg-soft: #0a0a0a;
+  --bg-card: #111111;
+  --bg-card-2: #161616;
+  --text: #ffffff;
+  --text-muted: rgba(255,255,255,0.55);
+  --text-faint: rgba(255,255,255,0.30);
+  --border: rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.18);
+  --primary: #FF0000;
+  --primary-glow: rgba(255,0,0,0.35);
+  --gold: #D4AF37;
+  --gold-bright: #FFD700;
+  --success: #00ff8c;
+}
+body.woman {
+  --bg: #FFF5F7;
+  --bg-soft: #FAEDF0;
+  --bg-card: #ffffff;
+  --bg-card-2: #FFF8FA;
+  --text: #3A1020;
+  --text-muted: rgba(58,16,32,0.55);
+  --text-faint: rgba(58,16,32,0.30);
+  --border: rgba(232,99,154,0.15);
+  --border-strong: rgba(232,99,154,0.30);
+  --primary: #E8639A;
+  --primary-glow: rgba(232,99,154,0.35);
+  --success: #00A044;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Top bar */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+body.woman .top-bar { background: rgba(255,245,247,0.85); }
+.top-bar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.top-bar .brand .logo {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--primary), #ff6633);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: #fff;
+}
+body.woman .top-bar .brand .logo { background: linear-gradient(135deg, #E8639A, #B03070); }
+.top-bar .brand-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+.top-bar .brand-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-top: 2px;
+}
+.top-bar .nav { display: flex; gap: 8px; align-items: center; }
+.top-bar .nav a, .top-bar .nav button {
+  padding: 7px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.top-bar .nav a:hover, .top-bar .nav button:hover { background: rgba(255,255,255,0.10); }
+body.woman .top-bar .nav a, body.woman .top-bar .nav button { background: rgba(232,99,154,0.06); }
+
+/* Container */
+.container { max-width: 720px; margin: 0 auto; padding: 24px 20px 40px; }
+
+/* Greeting */
+.greeting { margin-bottom: 24px; text-align: center; }
+.greeting h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+.greeting h1 .accent { color: var(--primary); }
+.greeting p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* Section card */
+.section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 24px 22px;
+  margin-bottom: 16px;
+}
+.section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.section h2 .accent { color: var(--primary); }
+.section .desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+/* Status banner */
+.status-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 18px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+}
+body.woman .status-banner { background: rgba(232,99,154,0.05); }
+.status-banner .info .lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.status-banner .info p {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* CTA Button */
+.btn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+.btn-primary:hover { transform: translateY(-1px); }
+body.woman .btn-primary {
+  background: linear-gradient(135deg, #E8639A, #B03070);
+  color: #fff;
+}
+
+/* Scan history list */
+.scan-list { display: grid; gap: 10px; }
+.scan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  color: inherit;
+  gap: 12px;
+}
+.scan-row:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateX(4px);
+}
+body.woman .scan-row { background: rgba(232,99,154,0.05); }
+.scan-row .meta { display: flex; align-items: center; gap: 14px; }
+.scan-row .num {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--primary);
+  line-height: 1;
+}
+.scan-row .info .ttl {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+.scan-row .info .date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.scan-row .scores {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.scan-row .pill {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  letter-spacing: 0.03em;
+}
+.scan-row .pill.success {
+  background: rgba(0,255,140,0.12);
+  color: var(--success);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 36px 20px;
+}
+.empty-state .ic {
+  font-size: 36px;
+  opacity: 0.4;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.6;
+}
+
+/* Resources grid */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+.resource-card {
+  display: block;
+  padding: 18px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.15s;
+  text-align: center;
+}
+.resource-card:hover {
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+body.woman .resource-card { background: rgba(232,99,154,0.05); }
+.resource-card .ic { font-size: 28px; margin-bottom: 8px; display: block; }
+.resource-card .ttl {
+  font-weight: 800;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+.resource-card .meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+@media (max-width: 480px) {
+  .greeting h1 { font-size: 30px; }
+  .container { padding: 18px 16px 32px; }
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="brand">
+    <div class="logo">✨</div>
+    <div>
+      <div class="brand-text">Maxlook AI</div>
+      <div class="brand-sub" id="brandSub">Dashboard</div>
+    </div>
+  </div>
+  <div class="nav">
+    <a id="bibleLink" href="#">📕 Bible</a>
+    <a id="workbookLink" href="#">📋 Workbook</a>
+    <button onclick="logout()">↗ Keluar</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="greeting">
+    <h1 id="greeting">Halo!</h1>
+    <p id="subGreeting">Loading dashboard...</p>
+  </div>
+
+  <!-- Score Card Widget (Umax-style) — shown when user has scan -->
+  <div id="scoreCardMount" style="margin-bottom:16px;"></div>
+
+  <!-- Scan Status -->
+  <div class="section" id="scanSection" style="display:none;">
+    <h2>Status <span class="accent">Scan</span></h2>
+    <p class="desc">Re-scan tiap 7 hari biar bisa track progress glow up <span id="sapaan1">lo</span>.</p>
+    <div class="status-banner">
+      <div class="info">
+        <div class="lbl">Status</div>
+        <p id="scanStatusText">—</p>
+      </div>
+      <a href="#" id="scanCta" class="btn btn-primary">📸 Scan Wajah</a>
+    </div>
+  </div>
+
+  <!-- Scan History -->
+  <div class="section" id="historySection" style="display:none;">
+    <h2>History <span class="accent">Scan</span></h2>
+    <p class="desc">Track progress week-by-week.</p>
+    <div class="scan-list" id="scanHistory"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <div class="ic">📷</div>
+      <p>Belum ada scan. Mulai scan pertama buat dapet roadmap personalize.</p>
+      <a href="#" id="firstScanCta" class="btn btn-primary">📸 Scan Pertama</a>
+    </div>
+  </div>
+
+  <!-- Resources -->
+  <div class="section" id="resourcesSection" style="display:none;">
+    <h2>Resources <span class="accent" id="sapaan2">Lo</span></h2>
+    <p class="desc">Akses lifetime — buka kapan aja.</p>
+    <div class="resources-grid">
+      <a href="#" id="roadmapBtn" class="resource-card">
+        <span class="ic">📋</span>
+        <div class="ttl">30-Day Roadmap</div>
+        <div class="meta">Latest scan plan</div>
+      </a>
+      <a href="#" id="bibleBtn" class="resource-card">
+        <span class="ic">📕</span>
+        <div class="ttl">Glow Up Bible</div>
+        <div class="meta">Long-form guide</div>
+      </a>
+      <a href="#" id="workbookBtn" class="resource-card">
+        <span class="ic">📝</span>
+        <div class="ttl">Action Workbook</div>
+        <div class="meta">Daily checklist</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const token = new URLSearchParams(window.location.search).get('token') || localStorage.getItem('maxlook_token');
+if (!token) window.location.href = '/';
+
+async function fetchUser() {
+  try {
+    const res = await fetch('/api/me', { headers: { 'X-Maxlook-Token': token } });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    return data;
+  } catch (e) {
+    alert('Token invalid. Login ulang.');
+    window.location.href = '/';
+  }
+}
+
+async function fetchScans() {
+  const res = await fetch('/api/scans', { headers: { 'X-Maxlook-Token': token } });
+  const data = await res.json();
+  return data.scans || [];
+}
+
+function fmtDate(s) {
+  return new Date(s).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+async function init() {
+  const data = await fetchUser();
+  const u = data.user;
+  document.body.classList.toggle('woman', u.gender === 'woman');
+
+  const sapaanCap = u.gender === 'woman' ? 'Kamu' : 'Lo';
+  const sapaan = u.gender === 'woman' ? 'kamu' : 'lo';
+  ['sapaan1'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = sapaan; });
+  ['sapaan2'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = sapaanCap; });
+
+  document.getElementById('greeting').innerHTML = u.gender === 'woman'
+    ? `Halo, <span class="accent">${u.name}</span> ✨`
+    : `Halo, <span class="accent">${u.name}</span> 🔥`;
+  document.getElementById('subGreeting').textContent = u.gender === 'woman'
+    ? 'Glow up journey kamu udah jalan. Total scan: ' + (u.total_scans || 0)
+    : 'Lo udah on track. Total scan: ' + (u.total_scans || 0);
+  document.getElementById('brandSub').textContent = u.gender === 'woman' ? 'Maxlook Woman' : 'Maxlook Man';
+
+  const bibleHref = u.gender === 'woman' ? '/bible-woman' : '/bible-man';
+  const workbookHref = u.gender === 'woman' ? '/workbook-woman' : '/workbook-man';
+  document.getElementById('bibleLink').href = bibleHref;
+  document.getElementById('workbookLink').href = workbookHref;
+  document.getElementById('bibleBtn').href = bibleHref;
+  document.getElementById('workbookBtn').href = workbookHref;
+  document.getElementById('roadmapBtn').href = '/api/roadmap?token=' + encodeURIComponent(token);
+
+  document.getElementById('scanSection').style.display = 'block';
+  document.getElementById('historySection').style.display = 'block';
+  document.getElementById('resourcesSection').style.display = 'block';
+
+  if (data.canScan) {
+    document.getElementById('scanStatusText').textContent = '✓ Scan tersedia';
+    document.getElementById('scanCta').href = '/scan?token=' + encodeURIComponent(token);
+  } else {
+    const dt = new Date(data.nextScanAt);
+    const daysLeft = Math.ceil((dt - new Date()) / (24 * 3600 * 1000));
+    document.getElementById('scanStatusText').textContent = `⏳ Re-scan dalam ${daysLeft} hari`;
+    document.getElementById('scanCta').textContent = 'Locked';
+    document.getElementById('scanCta').style.opacity = '0.4';
+    document.getElementById('scanCta').onclick = (e) => { e.preventDefault(); alert('Re-scan available 7 hari setelah scan terakhir.'); };
+  }
+
+  let scans = [];
+  try {
+    scans = await fetchScans();
+    console.log('[dashboard] scans loaded:', scans.length);
+  } catch (e) {
+    console.error('[dashboard] fetchScans failed:', e);
+  }
+  const histEl = document.getElementById('scanHistory');
+  const emptyEl = document.getElementById('emptyState');
+
+  // Mount score card if there's a latest scan (defensive — never block history render)
+  if (scans.length > 0 && typeof ScoreCard !== 'undefined') {
+    try {
+      const latest = scans[0];
+      const raw = latest.raw_result || {};
+      const cachedPhoto = sessionStorage.getItem('maxlook_last_scan_photo')
+        || localStorage.getItem('maxlook_last_scan_photo');
+      const overall = latest.overall_score || raw.overall || 0;
+      const potential = latest.potential_score || raw.potential || 0;
+      ScoreCard.mount(document.getElementById('scoreCardMount'), {
+        photoUrl: cachedPhoto || null,
+        name: u.name,
+        subtitle: `Scan terakhir · ${fmtDate(latest.created_at)}`,
+        gender: u.gender,
+        scores: {
+          overall: overall,
+          potential: potential,
+          masculinity: raw.lemon8_analysis?.masculinity_score || raw.masculinity_score || raw.harmony || overall,
+          femininity: raw.lemon8_analysis?.femininity_score || raw.femininity_score || raw.harmony || overall,
+          skin_quality: latest.skin_glow || raw.skin_glow || overall,
+          jawline: latest.jawline || raw.jawline || overall,
+          cheekbones: raw.bone_structure?.facial_harmony_score || raw.lemon8_analysis?.cheekbones_score || raw.cheekbones_score || raw.harmony || overall
+        },
+        ctaText: 'Lihat Detail Analisis',
+        ctaHref: '/result?id=' + latest.id + '&token=' + encodeURIComponent(token),
+        compact: true
+      });
+    } catch (e) {
+      console.error('[dashboard] ScoreCard mount failed:', e);
+    }
+  }
+
+  // History — independent from score card success
+  try {
+    if (scans.length === 0) {
+      histEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+      document.getElementById('firstScanCta').href = '/scan?token=' + encodeURIComponent(token);
+    } else {
+      histEl.innerHTML = scans.map(s => {
+        const ov = s.overall_score || 0;
+        const pot = s.potential_score || 0;
+        const delta = Math.max(0, pot - ov);
+        return `
+        <a href="/result?id=${s.id}&token=${encodeURIComponent(token)}" class="scan-row">
+          <div class="meta">
+            <div class="num">#${s.scan_number}</div>
+            <div class="info">
+              <div class="ttl">Scan ${fmtDate(s.created_at)}</div>
+              <div class="date">${(s.skin_type||'').toUpperCase()} · ${s.season||''}</div>
+            </div>
+          </div>
+          <div class="scores">
+            <span class="pill">Overall ${ov}</span>
+            <span class="pill success">+${delta}</span>
+          </div>
+        </a>`;
+      }).join('');
+    }
+  } catch (e) {
+    console.error('[dashboard] History render failed:', e);
+  }
+}
+
+function logout() {
+  localStorage.removeItem('maxlook_token');
+  localStorage.removeItem('maxlook_user');
+  window.location.href = '/';
+}
+
+init();
+</script>
+</body>
+</html>

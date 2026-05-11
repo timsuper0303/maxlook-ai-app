@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Maxlook AI Scanner — Login</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Poppins',sans-serif; background:linear-gradient(135deg, #0a0a0a 0%, #1a0a14 50%, #0a0a0a 100%); color:#fff; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.bg-orb { position:absolute; border-radius:50%; filter:blur(80px); opacity:0.4; pointer-events:none; }
+.bg-orb.r { background:#FF0000; width:400px; height:400px; top:-100px; left:-100px; }
+.bg-orb.p { background:#E8639A; width:400px; height:400px; bottom:-100px; right:-100px; }
+.container { position:relative; z-index:1; max-width:480px; width:100%; }
+.card { background:linear-gradient(145deg, #1a1a1a, #0f0f0f); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:40px 32px; box-shadow:0 24px 80px rgba(0,0,0,0.4); }
+.logo { text-align:center; margin-bottom:24px; }
+.logo .ic { width:64px; height:64px; background:linear-gradient(135deg, #FF0000, #E8639A); border-radius:16px; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:12px; }
+.logo h1 { font-family:'Playfair Display',serif; font-size:28px; font-weight:800; }
+.logo p { font-size:13px; color:rgba(255,255,255,0.55); margin-top:4px; }
+.form { margin-top:24px; }
+.form label { display:block; font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.6); margin-bottom:8px; }
+.form input { width:100%; padding:14px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:#fff; font-size:14px; font-family:'Poppins',monospace; transition:all 0.2s; }
+.form input:focus { outline:none; border-color:#FF0000; background:rgba(255,0,0,0.05); }
+.form .btn { width:100%; padding:16px; background:linear-gradient(90deg, #FF0000, #E8639A); border:none; border-radius:12px; color:#fff; font-size:15px; font-weight:800; cursor:pointer; margin-top:16px; transition:transform 0.2s; }
+.form .btn:hover { transform:scale(1.02); }
+.form .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.error { padding:12px 16px; background:rgba(255,0,0,0.12); border:1px solid rgba(255,0,0,0.3); border-radius:10px; color:#ff8888; font-size:13px; margin-top:12px; display:none; }
+.error.show { display:block; }
+.help { text-align:center; margin-top:20px; font-size:12px; color:rgba(255,255,255,0.5); line-height:1.6; }
+.help a { color:#E8639A; text-decoration:none; }
+.divider { display:flex; align-items:center; gap:12px; margin:20px 0; }
+.divider::before, .divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.1); }
+.divider span { font-size:11px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.15em; }
+.bible-links { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.bible-links a { padding:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:rgba(255,255,255,0.7); font-size:12px; text-align:center; text-decoration:none; transition:all 0.2s; }
+.bible-links a:hover { background:rgba(232,99,154,0.1); border-color:#E8639A; color:#fff; }
+</style>
+</head>
+<body>
+<div class="bg-orb r"></div>
+<div class="bg-orb p"></div>
+<div class="container">
+  <div class="card">
+    <div class="logo">
+      <div class="ic">✨</div>
+      <h1>Maxlook AI Scanner</h1>
+      <p>AI Face Scan · 5-Dimensi Glow Up Score</p>
+    </div>
+    <form class="form" onsubmit="login(event)">
+      <label>Access Token</label>
+      <input type="text" id="token" placeholder="ABC123XYZ..." autocomplete="off" required>
+      <div class="error" id="errorMsg"></div>
+      <button class="btn" type="submit" id="loginBtn">→ MASUK DASHBOARD</button>
+    </form>
+    <p class="help">
+      Token lo dapet via WhatsApp dari admin Maxlook setelah pembayaran. <br>
+      Belum punya? <a href="#" onclick="alert('Hubungi admin di WhatsApp untuk dapet akses')">Hubungi admin</a>
+    </p>
+    <div class="divider"><span>Resources Public</span></div>
+    <div class="bible-links">
+      <a href="/bible-man">📕 Bible Man</a>
+      <a href="/bible-woman">📕 Bible Woman</a>
+      <a href="/workbook-man">📋 Workbook Man</a>
+      <a href="/workbook-woman">📋 Workbook Woman</a>
+    </div>
+  </div>
+</div>
+<script>
+async function login(e) {
+  e.preventDefault();
+  const token = document.getElementById('token').value.trim();
+  const errorEl = document.getElementById('errorMsg');
+  const btn = document.getElementById('loginBtn');
+  errorEl.classList.remove('show');
+  btn.disabled = true; btn.textContent = '⏳ Verifying...';
+  try {
+    const res = await fetch('/api/me', { headers: { 'X-Maxlook-Token': token } });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Token invalid');
+    localStorage.setItem('maxlook_token', token);
+    localStorage.setItem('maxlook_user', JSON.stringify(data.user));
+    window.location.href = '/dashboard?token=' + encodeURIComponent(token);
+  } catch (err) {
+    errorEl.textContent = '❌ ' + err.message;
+    errorEl.classList.add('show');
+    btn.disabled = false; btn.textContent = '→ MASUK DASHBOARD';
+  }
+}
+// Auto-fill if token in URL or localStorage
+const urlToken = new URLSearchParams(window.location.search).get('token');
+const storedToken = localStorage.getItem('maxlook_token');
+if (urlToken) document.getElementById('token').value = urlToken;
+else if (storedToken) document.getElementById('token').value = storedToken;
+</script>
+</body>
+</html>

@@ -1,0 +1,633 @@
+/* ═══════════════════════════════════════════════════════
+   Maxlook Facecard — Premium Infographic Poster
+   4 sections: Face Features · Personal Color · Hair/Hijab · Spectacles
+   Variant-aware (Man red/orange · Woman rose/gold)
+   ═══════════════════════════════════════════════════════ */
+
+.facecard {
+  --fc-bg:        var(--m-bg-card);
+  --fc-bg-soft:   rgba(255, 255, 255, 0.03);
+  --fc-border:    var(--m-border);
+  --fc-text:      var(--m-text-primary);
+  --fc-text-soft: var(--m-text-secondary);
+  --fc-text-mute: var(--m-text-muted);
+  --fc-accent-a:  #FF0000;
+  --fc-accent-b:  #FF8855;
+  --fc-card-bg:   linear-gradient(160deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 28px 24px 24px;
+  background:
+    radial-gradient(ellipse at top right, rgba(255,102,51,0.08), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(255,0,0,0.06), transparent 60%),
+    linear-gradient(180deg, #0d0d0d, #0a0a0a);
+  border: 1px solid var(--fc-border);
+  border-radius: 28px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  font-family: var(--font-body);
+  color: var(--fc-text);
+  overflow: hidden;
+}
+
+/* Woman variant */
+.woman .facecard,
+[data-variant="woman"] .facecard,
+.facecard.woman {
+  --fc-accent-a: #E8639A;
+  --fc-accent-b: #D4AF37;
+  --fc-card-bg: linear-gradient(160deg, rgba(255,255,255,0.85), rgba(255,245,247,0.6));
+  --fc-bg-soft: rgba(232,99,154,0.04);
+  background:
+    radial-gradient(ellipse at top right, rgba(212,175,55,0.12), transparent 60%),
+    radial-gradient(ellipse at bottom left, rgba(232,99,154,0.10), transparent 60%),
+    linear-gradient(180deg, #FFF9FB, #FFEEF3);
+  color: #3A1020;
+}
+
+/* ── Brand header ───────────────────────────────────────────── */
+.facecard .fc-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--fc-border);
+}
+.facecard .fc-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+.facecard .fc-brand-mark::before,
+.facecard .fc-brand-mark::after {
+  content: "✦";
+  font-size: 12px;
+  color: var(--fc-accent-a);
+  text-shadow: 0 0 12px var(--fc-accent-a);
+}
+.facecard .fc-brand-meta {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+  font-weight: 700;
+}
+
+/* ── Title ──────────────────────────────────────────────────── */
+.facecard .fc-title {
+  text-align: center;
+  margin: 6px 0 24px;
+}
+.facecard .fc-title h1 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 5vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+  margin: 0;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, var(--fc-accent-a), var(--fc-accent-b));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.facecard .fc-title .sub {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+  margin-top: 8px;
+  -webkit-text-fill-color: var(--fc-text-mute);
+}
+
+/* ── Section frame ──────────────────────────────────────────── */
+.facecard .fc-section {
+  margin: 18px 0;
+  padding: 18px;
+  background: var(--fc-card-bg);
+  border: 1px solid var(--fc-border);
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+}
+.facecard .fc-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--fc-border);
+}
+.facecard .fc-section-head .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px; height: 24px;
+  background: linear-gradient(135deg, var(--fc-accent-a), var(--fc-accent-b));
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.facecard .fc-section-head .h {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  flex: 1;
+}
+.facecard .fc-section-head .tag {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fc-accent-a);
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.85;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 1 — Face Features Analysis (vertical layout, mobile-first)
+   ═══════════════════════════════════════════════════════════════ */
+.fc-face-board {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fc-face-portrait {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0a0a0a;
+  border: 1px solid var(--fc-border);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+}
+.fc-face-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.fc-face-portrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
+}
+.fc-face-portrait .face-shape-pill {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.fc-face-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  align-content: start;
+  text-align: left;
+}
+@media (max-width: 380px) {
+  .fc-face-stats { grid-template-columns: 1fr; }
+}
+
+.fc-stat {
+  background: var(--fc-bg-soft);
+  border: 1px solid var(--fc-border);
+  border-left: 3px solid var(--fc-accent-a);
+  border-radius: 12px;
+  padding: 12px 14px;
+  position: relative;
+  transition: transform 200ms ease, border-color 200ms ease;
+  min-width: 0;
+}
+.fc-stat:hover {
+  transform: translateY(-2px);
+  border-color: var(--fc-accent-a);
+}
+.fc-stat .label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fc-accent-a);
+  margin-bottom: 6px;
+}
+.fc-stat .value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: var(--fc-text);
+  line-height: 1.1;
+}
+.fc-stat .desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--fc-text-soft);
+  word-break: break-word;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 2 — Personal Color (pure swatch palette, no photo)
+   ═══════════════════════════════════════════════════════════════ */
+.fc-color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 480px) {
+  .fc-color-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.fc-color-cell {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--fc-bg-soft);
+  border: 1px solid var(--fc-border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 200ms ease;
+}
+.fc-color-cell:hover { transform: translateY(-2px); }
+.fc-color-cell.good { border: 1px solid rgba(0,224,140,0.25); }
+.fc-color-cell.bad  { border: 1px solid rgba(255,80,80,0.20); opacity: 0.95; }
+
+/* Pure color swatch — fills entire thumb */
+.fc-color-swatch {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+.fc-color-swatch .label-pill {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.fc-color-cell.good .label-pill { background: rgba(0,160,80,0.85); }
+.fc-color-cell.bad  .label-pill { background: rgba(180,40,40,0.85); }
+.fc-color-cell.bad .fc-color-swatch::after {
+  content: "✕";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 38px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.35);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+.fc-color-foot {
+  padding: 10px 12px 12px;
+  background: rgba(0,0,0,0.35);
+  text-align: center;
+}
+.woman .fc-color-foot { background: rgba(255,245,247,0.7); }
+.fc-color-foot .name {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+.fc-color-foot .hex {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--fc-text-mute);
+  letter-spacing: 0.08em;
+}
+
+.fc-color-meta {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 11px;
+}
+.fc-color-meta .pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-soft);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.fc-color-meta .pill strong {
+  color: var(--fc-accent-a);
+  font-weight: 800;
+}
+
+.fc-color-divider {
+  margin: 14px 0 10px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fc-color-divider::before,
+.fc-color-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--fc-border);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 3 — Hairstyle / Hijab Style
+   ═══════════════════════════════════════════════════════════════ */
+.fc-style-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+@media (max-width: 480px) {
+  .fc-style-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.fc-style-card {
+  background: var(--fc-bg-soft);
+  border: 1px solid var(--fc-border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 200ms ease;
+}
+.fc-style-card:hover { transform: translateY(-3px); }
+.fc-style-card.good { border-color: rgba(0,224,140,0.25); }
+.fc-style-card.bad  { border-color: rgba(255,80,80,0.20); opacity: 0.95; }
+
+.fc-style-thumb {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+  overflow: hidden;
+}
+.woman .fc-style-thumb {
+  background: linear-gradient(135deg, #FFEEF3, #FAD3DD);
+}
+.fc-style-thumb img,
+.fc-style-thumb svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.fc-style-thumb .badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+.fc-style-card.good .badge { background: rgba(0,160,80,0.85); }
+.fc-style-card.bad  .badge { background: rgba(180,40,40,0.85); }
+
+.fc-style-foot {
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.25);
+}
+.woman .fc-style-foot { background: rgba(255,245,247,0.65); }
+.fc-style-foot .name {
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+.fc-style-foot .reason {
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--fc-text-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SECTION 4 — Spectacles Guide
+   ═══════════════════════════════════════════════════════════════ */
+.fc-glass-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 480px) {
+  .fc-glass-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.fc-glass-card {
+  background: var(--fc-bg-soft);
+  border: 1px solid var(--fc-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.fc-glass-card.good { border-color: rgba(0,224,140,0.25); }
+.fc-glass-card.bad  { border-color: rgba(255,80,80,0.20); opacity: 0.92; }
+
+.fc-glass-thumb {
+  position: relative;
+  aspect-ratio: 5 / 3;
+  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+}
+.woman .fc-glass-thumb {
+  background: linear-gradient(135deg, #FFF5F7, #FAD3DD);
+}
+.fc-glass-thumb .frame {
+  width: 78%;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.fc-glass-thumb .frame svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.fc-glass-thumb .badge {
+  position: absolute;
+  top: 6px; left: 6px;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+}
+.fc-glass-card.good .badge { background: rgba(0,160,80,0.85); }
+.fc-glass-card.bad  .badge { background: rgba(180,40,40,0.85); }
+
+.fc-glass-foot {
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.25);
+}
+.woman .fc-glass-foot { background: rgba(255,245,247,0.65); }
+.fc-glass-foot .name {
+  font-size: 11px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+.fc-glass-foot .reason {
+  font-size: 9px;
+  line-height: 1.35;
+  color: var(--fc-text-soft);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Watermark + Footer
+   ═══════════════════════════════════════════════════════════════ */
+.fc-watermark {
+  position: relative;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--fc-border);
+  text-align: center;
+}
+.fc-watermark .stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--fc-text-soft);
+}
+.fc-watermark .stamp::before,
+.fc-watermark .stamp::after {
+  content: "";
+  width: 36px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--fc-accent-a), transparent);
+}
+.fc-watermark .stamp .sparkle {
+  color: var(--fc-accent-a);
+  text-shadow: 0 0 10px var(--fc-accent-a);
+}
+.fc-watermark .sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Action bar (download/share/regen)
+   ═══════════════════════════════════════════════════════════════ */
+.facecard-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.facecard-actions .btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--fc-border);
+  background: var(--fc-bg-soft);
+  color: var(--fc-text);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+.facecard-actions .btn:hover {
+  transform: translateY(-1px);
+  border-color: var(--fc-accent-a);
+  box-shadow: 0 4px 16px rgba(255,0,0,0.2);
+}
+.facecard-actions .btn.primary {
+  background: linear-gradient(135deg, var(--fc-accent-a), var(--fc-accent-b));
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Loading skeleton
+   ═══════════════════════════════════════════════════════════════ */
+.facecard.loading {
+  min-height: 800px;
+  display: grid;
+  place-items: center;
+}
+.facecard.loading::after {
+  content: "Generating facecard...";
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+}
+
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fc-text-mute);
+}

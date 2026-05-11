@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Maxlook Scan Flow — Mockup</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   MAXLOOK SCAN FLOW — MOCKUP
+   3 screens: Camera → Form → Result
+   Toggle Man / Woman variant
+   ═══════════════════════════════════════════════════════ */
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --m-primary: #FF0000;
+  --m-primary-dark: #B30000;
+  --m-primary-glow: rgba(255, 0, 0, 0.35);
+  --m-accent: #ff6633;
+  --m-success: #00ff8c;
+  --m-warning: #ffb000;
+  --m-danger: #ff3344;
+  --m-bg-base: #0a0a0a;
+  --m-bg-card: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+  --m-bg-overlay: rgba(255, 0, 0, 0.06);
+  --m-border: rgba(255, 255, 255, 0.08);
+  --m-text-primary: #ffffff;
+  --m-text-muted: rgba(255, 255, 255, 0.55);
+  --m-gradient-hero: linear-gradient(135deg, #FF0000 0%, #ff6633 100%);
+}
+.woman {
+  --m-primary: #E8639A;
+  --m-primary-dark: #B03070;
+  --m-primary-glow: rgba(232, 99, 154, 0.35);
+  --m-accent: #FADADD;
+  --m-success: #00A044;
+  --m-bg-base: #FFF5F7;
+  --m-bg-card: #ffffff;
+  --m-bg-overlay: rgba(232, 99, 154, 0.06);
+  --m-border: rgba(232, 99, 154, 0.15);
+  --m-text-primary: #3A1020;
+  --m-text-muted: rgba(58, 16, 32, 0.55);
+  --m-gradient-hero: linear-gradient(135deg, #E8639A 0%, #B03070 100%);
+}
+
+body {
+  font-family:'Inter',sans-serif;
+  background: var(--m-bg-base);
+  color: var(--m-text-primary);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+  overflow-x: hidden;
+}
+
+/* ── Top control bar (mockup-only) ── */
+.mock-controls {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  z-index: 1000;
+  padding: 8px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.mock-controls button {
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.mock-controls button.active {
+  background: var(--m-gradient-hero);
+  color: #fff;
+}
+.mock-label {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  padding: 8px 14px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Screen container ── */
+.screen { display: none; min-height: 100vh; padding: 20px; padding-top: 80px; }
+.screen.active { display: block; }
+
+/* ── Common header ── */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.app-header .brand { display: flex; align-items: center; gap: 10px; }
+.app-header .logo {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--m-gradient-hero);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.app-header .brand-text { font-family: 'Playfair Display', serif; font-weight: 800; font-size: 18px; }
+.app-header .brand-sub { font-size: 11px; color: var(--m-text-muted); font-weight: 600; margin-top: 2px; }
+.step-pill {
+  padding: 6px 14px;
+  background: var(--m-bg-overlay);
+  border: 1px solid var(--m-border);
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--m-primary);
+}
+
+.container { max-width: 540px; margin: 0 auto; }
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 1: CAMERA CAPTURE
+   ═══════════════════════════════════════════════════════ */
+#screen-camera h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+#screen-camera .sub {
+  font-size: 14px;
+  color: var(--m-text-muted);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #000;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 2px solid var(--m-border);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  margin-bottom: 16px;
+}
+.woman .camera-frame { border-color: rgba(232,99,154,0.25); box-shadow: 0 16px 48px rgba(176,48,112,0.15); }
+
+.camera-frame video,
+.camera-frame canvas.face-mesh,
+.camera-frame .demo-overlay,
+.camera-frame .silhouette-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.camera-frame video { transform: scaleX(-1); /* mirror selfie */ }
+.demo-overlay {
+  background: linear-gradient(135deg, #1a1a1a, #2a1a1a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+  padding: 20px;
+}
+.demo-overlay .ic { font-size: 48px; margin-bottom: 12px; }
+
+/* AR face mesh canvas (drawn on top of video) */
+.camera-frame canvas.face-mesh {
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Silhouette SVG guide overlay */
+.silhouette-svg {
+  pointer-events: none;
+  z-index: 1;
+}
+.silhouette-path {
+  fill: none;
+  stroke: var(--m-primary);
+  stroke-width: 2;
+  stroke-dasharray: 8 6;
+  filter: drop-shadow(0 0 8px var(--m-primary-glow));
+  animation: silhouettePulse 2s ease-in-out infinite;
+}
+@keyframes silhouettePulse {
+  0%, 100% { opacity: 0.6; stroke-dashoffset: 0; }
+  50% { opacity: 1; stroke-dashoffset: -14; }
+}
+
+/* Realtime feedback overlay */
+.feedback {
+  position: absolute;
+  top: 16px; left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 50px;
+  border: 1px solid var(--m-border);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.25s;
+}
+.feedback.ok { background: rgba(0,255,140,0.25); border-color: var(--m-success); color: var(--m-success); }
+.feedback.warn { background: rgba(255,176,0,0.25); border-color: var(--m-warning); color: var(--m-warning); }
+.feedback.bad { background: rgba(255,51,68,0.25); border-color: var(--m-danger); color: var(--m-danger); }
+.feedback .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor; }
+
+/* Camera controls */
+.cam-ctrl {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+.cam-ctrl .capture-btn {
+  width: 76px; height: 76px;
+  border-radius: 50%;
+  background: var(--m-gradient-hero);
+  border: 4px solid var(--m-bg-base);
+  box-shadow: 0 0 0 3px var(--m-primary), 0 8px 24px var(--m-primary-glow);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+}
+.cam-ctrl .capture-btn:active { transform: scale(0.92); }
+.cam-ctrl .capture-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--m-text-muted);
+  box-shadow: none;
+}
+
+/* Tips card */
+.tips-card {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-radius: 14px;
+}
+.tips-card h3 {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--m-primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tips-card ul { list-style: none; }
+.tips-card li {
+  font-size: 13px;
+  line-height: 1.7;
+  padding-left: 22px;
+  position: relative;
+  color: var(--m-text-primary);
+  opacity: 0.85;
+}
+.tips-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--m-success);
+  font-weight: 800;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 2: PREVIEW + FORM
+   ═══════════════════════════════════════════════════════ */
+#screen-form .preview-card {
+  position: relative;
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+#screen-form .preview-img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  border-radius: 16px;
+  object-fit: cover;
+  display: block;
+  background: #1a1a1a;
+}
+#screen-form .preview-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+#screen-form .preview-controls button {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--m-border);
+  background: var(--m-bg-overlay);
+  color: var(--m-text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.form-card {
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.form-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.form-card .form-sub {
+  font-size: 13px;
+  color: var(--m-text-muted);
+  margin-bottom: 20px;
+}
+
+.field { margin-bottom: 16px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m-text-muted);
+  margin-bottom: 6px;
+}
+.field label .req {
+  color: var(--m-danger);
+  margin-left: 3px;
+}
+.field label .opt {
+  color: var(--m-text-muted);
+  font-weight: 500;
+  font-size: 10px;
+  margin-left: 6px;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+.field input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--m-bg-overlay);
+  border: 1px solid var(--m-border);
+  border-radius: 10px;
+  color: var(--m-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.field input:focus {
+  outline: none;
+  border-color: var(--m-primary);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Goals chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  padding: 8px 12px;
+  background: var(--m-bg-overlay);
+  border: 1px solid var(--m-border);
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--m-text-primary);
+  user-select: none;
+}
+.chip:hover {
+  border-color: var(--m-primary);
+}
+.chip.selected {
+  background: var(--m-gradient-hero);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  background: var(--m-gradient-hero);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 8px;
+  box-shadow: 0 8px 24px var(--m-primary-glow);
+  transition: transform 0.15s;
+}
+.btn-submit:active { transform: scale(0.98); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN 3: RESULT
+   ═══════════════════════════════════════════════════════ */
+#screen-result h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 900;
+  margin-bottom: 4px;
+}
+#screen-result .meta {
+  font-size: 13px;
+  color: var(--m-text-muted);
+  margin-bottom: 20px;
+}
+#screen-result .meta strong { color: var(--m-text-primary); }
+
+.twibbon {
+  position: relative;
+  aspect-ratio: 3/4;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--m-bg-card);
+  margin-bottom: 16px;
+  border: 2px solid var(--m-border);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+}
+.twibbon img.user-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.twibbon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0,0,0,0.6) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+.woman .twibbon::before { background: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(58,16,32,0.6) 100%); }
+
+.twibbon-overlay { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.twibbon-overlay svg { width: 100%; height: 100%; }
+
+.anno-card {
+  position: absolute;
+  background: rgba(20,20,20,0.95);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  font-family: inherit;
+}
+.woman .anno-card { background: rgba(255,255,255,0.95); border-color: currentColor; }
+.anno-card .anno-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.twibbon-foot {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 4;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
+.twibbon-foot .score-block { color: #fff; }
+.woman .twibbon-foot .score-block { color: #fff; }
+.twibbon-foot .lbl { font-size: 9px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.7; }
+.twibbon-foot .num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 900; line-height: 1; }
+.twibbon-foot .arrow { font-size: 22px; opacity: 0.6; color: #fff; align-self: center; padding-bottom: 4px; }
+.twibbon-foot .potential .num { color: var(--m-success); }
+.twibbon-brand {
+  position: absolute;
+  top: 16px; left: 16px;
+  z-index: 5;
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  border-radius: 50px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.twibbon-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.twibbon-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--m-border);
+  background: var(--m-bg-overlay);
+  color: var(--m-text-primary);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.twibbon-actions button.primary {
+  background: var(--m-gradient-hero);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px var(--m-primary-glow);
+}
+
+/* Score gauge cards */
+.scores-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.gauge {
+  position: relative;
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-radius: 18px;
+  padding: 20px 12px;
+  text-align: center;
+}
+.gauge svg { width: 120px; height: 120px; margin: 0 auto 8px; display: block; }
+.gauge .gauge-num {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, calc(-50% - 18px));
+  font-family: 'Playfair Display', serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+}
+.gauge.current .gauge-num { color: var(--m-primary); }
+.gauge.potential .gauge-num { color: var(--m-success); }
+.gauge .gauge-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--m-text-muted);
+}
+
+/* Concerns list */
+.concerns-section { margin-bottom: 24px; }
+.section-h {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.section-h .accent { color: var(--m-primary); }
+.section-desc {
+  font-size: 12px;
+  color: var(--m-text-muted);
+  margin-bottom: 14px;
+}
+
+.concern-card {
+  position: relative;
+  background: var(--m-bg-card);
+  border: 1px solid var(--m-border);
+  border-left: 4px solid var(--card-color, var(--m-primary));
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.concern-card .rank-bubble {
+  position: absolute;
+  top: -8px; left: -8px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--card-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 12px;
+}
+.concern-card .area {
+  font-weight: 800;
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.sev-badge {
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.sev-severe { background: rgba(255,51,68,0.18); color: #ff3344; }
+.sev-moderate { background: rgba(255,176,0,0.18); color: #ffb000; }
+.sev-mild { background: rgba(0,224,96,0.18); color: #00e060; }
+
+.concern-card .issue { font-size: 12px; color: var(--m-text-muted); margin: 6px 0 8px; line-height: 1.5; }
+.concern-card .protocol { font-size: 12px; font-weight: 700; color: var(--card-color); }
+.concern-card .impact {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--m-text-muted);
+}
+.concern-card .impact .pts { color: var(--m-success); font-weight: 700; }
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulseRing {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+.anim-fade { animation: fadeUp 400ms ease-out both; }
+
+/* Mobile optimization */
+@media (max-width: 480px) {
+  .container { padding: 0; }
+  .screen { padding: 16px; padding-top: 76px; }
+  #screen-camera h1 { font-size: 28px; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Mockup-only controls (toggle variant + screen) -->
+<div class="mock-label" id="mockLabel">📐 MOCKUP MODE — Screen 1/3</div>
+<div class="mock-controls">
+  <button onclick="setVariant('man')" class="active" id="btn-man">♂ Man</button>
+  <button onclick="setVariant('woman')" id="btn-woman">♀ Woman</button>
+  <button onclick="goScreen(1)" id="btn-s1" class="active">📷 1</button>
+  <button onclick="goScreen(2)" id="btn-s2">📋 2</button>
+  <button onclick="goScreen(3)" id="btn-s3">✨ 3</button>
+  <button onclick="toggleDebug()" id="btn-debug" style="background:rgba(255,176,0,0.3);color:#ffb000;">🔬 Debug</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1: CAMERA CAPTURE
+     ═══════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-camera">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">✨</div>
+        <div>
+          <div class="brand-text">Maxlook AI Scanner</div>
+          <div class="brand-sub" id="variantLabel1">Man · 5-Dimensi Scan</div>
+        </div>
+      </div>
+      <div class="step-pill">1 / 3 · CAMERA</div>
+    </div>
+
+    <h1>Posisikan <span style="color:var(--m-primary)">Wajah Lo</span></h1>
+    <p class="sub">Wajah harus full keliatan, mata lurus ke kamera. Klik tombol ⬤ pas wajah udah aligned di guide.</p>
+
+    <div class="camera-frame" id="cameraFrame">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas class="face-mesh" id="faceMesh"></canvas>
+      <svg class="silhouette-svg" id="silhouetteSvg" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="demo-overlay" id="demoOverlay" style="display:flex;">
+        <div class="ic">📸</div>
+        <div>Camera placeholder</div>
+        <div style="margin-top:6px;font-size:11px;opacity:0.6;">Klik "Start Camera" untuk akses webcam</div>
+      </div>
+      <div class="feedback" id="feedback">
+        <span class="dot"></span>
+        <span id="feedbackText">Klik tombol Start Camera untuk mulai</span>
+      </div>
+    </div>
+
+    <div class="cam-ctrl">
+      <button id="btnStartCam" onclick="startCamera()" style="padding:12px 20px;border-radius:50px;border:1px solid var(--m-border);background:var(--m-bg-overlay);color:var(--m-text-primary);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">▶ Start Camera</button>
+      <button class="capture-btn" id="btnCapture" disabled onclick="captureSelfie()">⬤</button>
+      <button onclick="goScreen(2)" style="padding:12px 20px;border-radius:50px;border:1px solid var(--m-border);background:var(--m-bg-overlay);color:var(--m-text-primary);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">→ Skip (mockup)</button>
+    </div>
+
+    <div class="tips-card">
+      <h3>📌 Tips foto bagus</h3>
+      <ul>
+        <li>Wajah ke arah kamera, lurus 90°</li>
+        <li>Natural light — dekat jendela siang</li>
+        <li>Ngga perlu makeup tebal / filter</li>
+        <li>Background polos atau kosong</li>
+        <li>Rambut nge-frame muka, gak nutupin</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2: PHOTO PREVIEW + FORM
+     ═══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-form">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">✨</div>
+        <div>
+          <div class="brand-text">Maxlook AI Scanner</div>
+          <div class="brand-sub" id="variantLabel2">Man · Pre-Scan Info</div>
+        </div>
+      </div>
+      <div class="step-pill">2 / 3 · INFO</div>
+    </div>
+
+    <div class="preview-card">
+      <img class="preview-img" id="previewImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 400'%3E%3Crect fill='%231a1a1a' width='300' height='400'/%3E%3Ctext x='50%25' y='50%25' fill='%23555' font-family='Inter' font-size='14' text-anchor='middle' dy='.3em'%3E📸 Foto preview%3C/text%3E%3C/svg%3E" alt="Preview">
+      <div class="preview-controls">
+        <button onclick="goScreen(1)">↻ Retake</button>
+        <button onclick="goScreen(3)" style="background:var(--m-gradient-hero);color:#fff;border:none;font-weight:800">✓ Use this photo</button>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2>Sedikit Info Tentang <span style="color:var(--m-primary)" id="sapaan2">Lo</span></h2>
+      <p class="form-sub">Info ini bantu AI kasih analisis yang lebih akurat dan personal. Tinggi & berat optional.</p>
+
+      <div class="field">
+        <label>Umur <span class="req">*</span></label>
+        <input type="number" id="age" placeholder="e.g. 24" min="13" max="80" required>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Tinggi <span class="opt">opsional</span></label>
+          <input type="number" id="height" placeholder="170" min="100" max="220"> <span style="font-size:11px;color:var(--m-text-muted);position:relative;top:-32px;left:8px">cm</span>
+        </div>
+        <div class="field">
+          <label>Berat <span class="opt">opsional</span></label>
+          <input type="number" id="weight" placeholder="65" min="30" max="200"> <span style="font-size:11px;color:var(--m-text-muted);position:relative;top:-32px;left:8px">kg</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Goals Glow Up <span class="opt">pilih yang relevan</span></label>
+        <div class="chips" id="goalsChips">
+          <div class="chip" data-goal="jawline">⚔️ Sharp Jawline</div>
+          <div class="chip" data-goal="glass-skin">💎 Glass Skin</div>
+          <div class="chip" data-goal="clear-skin">✨ Clear Skin</div>
+          <div class="chip" data-goal="dark-circles">👁 No Dark Circles</div>
+          <div class="chip" data-goal="anti-aging">⏳ Anti-Aging</div>
+          <div class="chip" data-goal="symmetry">⚖️ Symmetry</div>
+          <div class="chip" data-goal="color-style">🎨 Personal Color</div>
+          <div class="chip" data-goal="overall">🌟 Overall Glow</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="submitToAI()">🚀 Analyze Wajah Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 3: RESULT
+     ═══════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-result">
+  <div class="container">
+    <div class="app-header">
+      <div class="brand">
+        <div class="logo">✨</div>
+        <div>
+          <div class="brand-text">Maxlook AI Scanner</div>
+          <div class="brand-sub" id="variantLabel3">Man · Hasil Scan</div>
+        </div>
+      </div>
+      <div class="step-pill">3 / 3 · RESULT</div>
+    </div>
+
+    <h1 class="anim-fade">Hasil Scan #1</h1>
+    <p class="meta anim-fade">06 May 2026, 03.42 · <strong>Man</strong> · Skin: <strong>OILY</strong> · Season: <strong>Cool Winter</strong></p>
+
+    <!-- TWIBBON -->
+    <div class="twibbon">
+      <div class="twibbon-brand">✨ MAXLOOK</div>
+      <img class="user-photo" id="resultPhoto" crossorigin="anonymous" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=600&q=80&fit=crop&auto=format" alt="Result">
+      <div class="twibbon-overlay" id="twibbonOverlay"></div>
+      <div class="twibbon-foot">
+        <div class="score-block">
+          <div class="lbl">Current</div>
+          <div class="num">72</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="score-block potential">
+          <div class="lbl">Potential</div>
+          <div class="num">87</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="twibbon-actions">
+      <button>📥 Download</button>
+      <button class="primary">📤 Share IG / WA</button>
+    </div>
+
+    <!-- SCORE GAUGES -->
+    <div class="scores-grid">
+      <div class="gauge current">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="var(--m-primary)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="276" stroke-dashoffset="77.3" transform="rotate(-90 50 50)"/>
+        </svg>
+        <div class="gauge-num">72</div>
+        <div class="gauge-lbl">Current</div>
+      </div>
+      <div class="gauge potential">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="var(--m-success)" stroke-width="8" stroke-linecap="round"
+            stroke-dasharray="276" stroke-dashoffset="35.9" transform="rotate(-90 50 50)"/>
+        </svg>
+        <div class="gauge-num">87</div>
+        <div class="gauge-lbl">Potential</div>
+      </div>
+    </div>
+
+    <!-- TOP CONCERNS -->
+    <section class="concerns-section">
+      <h2 class="section-h">Top <span class="accent">5 Area Fix</span></h2>
+      <p class="section-desc">Ranked dari paling impact. Tap kartu liat detail.</p>
+
+      <div class="concern-card" style="--card-color:#ff3344">
+        <div class="rank-bubble">1</div>
+        <div class="area">
+          <span>Eye Bags & Dark Circles</span>
+          <span class="sev-badge sev-severe">severe</span>
+        </div>
+        <div class="issue">Periorbital fatigue terlihat. Kombinasi dehidrasi + sleep debt nyimpan fluid di area mata.</div>
+        <div class="protocol">📋 Sleep 7+ jam, eye serum dengan caffeine + niacinamide</div>
+        <div class="impact"><span>⏱ 14 hari</span><span class="pts">+8 pts</span></div>
+      </div>
+
+      <div class="concern-card" style="--card-color:#ffb000">
+        <div class="rank-bubble">2</div>
+        <div class="area">
+          <span>Jawline Definition</span>
+          <span class="sev-badge sev-moderate">moderate</span>
+        </div>
+        <div class="issue">Lower face slightly soft. Kombinasi mewing + face training bisa improve dalam 21 hari.</div>
+        <div class="protocol">📋 Mewing 10 menit/hari + chin tucks 3×15 reps</div>
+        <div class="impact"><span>⏱ 21 hari</span><span class="pts">+5 pts</span></div>
+      </div>
+
+      <div class="concern-card" style="--card-color:#ffb000">
+        <div class="rank-bubble">3</div>
+        <div class="area">
+          <span>Open Pores T-Zone</span>
+          <span class="sev-badge sev-moderate">moderate</span>
+        </div>
+        <div class="issue">Pori-pori di hidung & forehead enlarged karena sebum production tinggi.</div>
+        <div class="protocol">📋 Niacinamide 5% serum + double cleanse PM</div>
+        <div class="impact"><span>⏱ 28 hari</span><span class="pts">+4 pts</span></div>
+      </div>
+
+      <div class="concern-card" style="--card-color:#00e060">
+        <div class="rank-bubble">4</div>
+        <div class="area">
+          <span>Skin Texture (Forehead)</span>
+          <span class="sev-badge sev-mild">mild</span>
+        </div>
+        <div class="issue">Subtle bumpy texture di forehead — likely closed comedones.</div>
+        <div class="protocol">📋 BHA exfoliant 2×/minggu, hydration boost</div>
+        <div class="impact"><span>⏱ 14 hari</span><span class="pts">+2 pts</span></div>
+      </div>
+
+      <div class="concern-card" style="--card-color:#00e060">
+        <div class="rank-bubble">5</div>
+        <div class="area">
+          <span>Lip Asymmetry (Mild)</span>
+          <span class="sev-badge sev-mild">mild</span>
+        </div>
+        <div class="issue">Slight asymmetry di mouth corner — likely habitual.</div>
+        <div class="protocol">📋 Face yoga lip exercises 5 min/hari</div>
+        <div class="impact"><span>⏱ 30 hari</span><span class="pts">+1 pts</span></div>
+      </div>
+    </section>
+
+    <p style="text-align:center;font-size:12px;color:var(--m-text-muted);margin-top:24px;padding:20px;border-top:1px solid var(--m-border);">
+      Mockup preview · Dashboard real bakal lebih panjang dengan personal color, skincare flow, outfit ideas, face yoga, 30-day timeline, dll.
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js" defer></script>
+<script>
+let currentVariant = 'man';
+let currentScreen = 1;
+let videoStream = null;
+let detectionInterval = null;
+let faceModelsLoaded = false;
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights';
+
+// ── Variant toggle ──
+function setVariant(v) {
+  currentVariant = v;
+  document.body.classList.toggle('woman', v === 'woman');
+  document.querySelectorAll('.mock-controls button').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + v).classList.add('active');
+  document.getElementById('btn-s' + currentScreen).classList.add('active');
+  ['variantLabel1', 'variantLabel2', 'variantLabel3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const labels = { 'variantLabel1': '5-Dimensi Scan', 'variantLabel2': 'Pre-Scan Info', 'variantLabel3': 'Hasil Scan' };
+      el.textContent = (v === 'woman' ? 'Woman' : 'Man') + ' · ' + labels[id];
+    }
+  });
+  document.getElementById('sapaan2').textContent = v === 'woman' ? 'Kamu' : 'Lo';
+
+  // Update result photo (different for each variant) — but only if no real user-captured photo
+  const resultPhoto = document.getElementById('resultPhoto');
+  if (resultPhoto && !resultPhoto.dataset.userCaptured) {
+    const photos = {
+      man: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=600&q=80&fit=crop&auto=format',
+      woman: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=600&q=80&fit=crop&auto=format'
+    };
+    resultPhoto.crossOrigin = 'anonymous';
+    resultPhoto.src = photos[v];
+    // Reset captured landmarks since photo changed
+    window.capturedLandmarks = null;
+    window.capturedFaceBox = null;
+    // Re-analyze new photo when loaded
+    resultPhoto.onload = () => analyzeResultPhoto();
+  }
+
+  // Update silhouette overlay
+  drawSilhouette();
+  // Re-render annotations (will use cached or fallback)
+  drawTwibbonAnnotations();
+}
+
+// ── Screen navigation ──
+function goScreen(n) {
+  currentScreen = n;
+  document.querySelectorAll('.screen').forEach((s, i) => s.classList.toggle('active', i === n - 1));
+  document.querySelectorAll('.mock-controls button[id^="btn-s"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-s' + n).classList.add('active');
+  document.getElementById('mockLabel').textContent = `📐 MOCKUP MODE — Screen ${n}/3`;
+  if (n !== 1) stopCamera();
+  if (n === 3) {
+    // Always run face-api on the result photo (whether captured or stock)
+    analyzeResultPhoto();
+  }
+  window.scrollTo(0, 0);
+}
+
+// ── Silhouette SVG (calibrated untuk wajah Indonesia general) ──
+//
+// Anthropometry references:
+// - Indonesian Sundanese face = hyperleptoprosopic (longer-narrower) than Western
+// - Common shapes: oval (40%), round (35%), oblong (25%)
+// - Frame the face to fill ~70% vertical, ~55-65% horizontal
+// - Eye level at 38% from top of face area (rule of thirds)
+//
+// Design principle: SIMPLE + PERMISSIVE.
+// Like Apple Face ID / Snapchat — soft oval outline + key reference points.
+// User aligns EYES to the horizontal line (most important), face fits inside oval.
+
+function drawSilhouette() {
+  const svg = document.getElementById('silhouetteSvg');
+  if (!svg) return;
+  const accent = currentVariant === 'man' ? '#FF0000' : '#E8639A';
+  const accentSoft = currentVariant === 'man' ? '#ff6633' : '#FADADD';
+
+  // Soft oval — looser to fit oval, round, oblong shapes
+  // viewBox 300x400. Face area: x=60-240 (180 wide), y=55-345 (290 tall).
+  // Aspect: 180:290 = 0.62 — calibrated for Indonesian face proportions
+  const ovalPath = 'M150,55 C90,60 60,120 60,200 C60,260 80,310 110,335 C125,343 140,348 150,348 C160,348 175,343 190,335 C220,310 240,260 240,200 C240,120 210,60 150,55 Z';
+
+  // Key vertical references (fraction of face area y=55-345, total 290):
+  //   Forehead margin: y=80
+  //   Eye level:       y=170 (38% from top)
+  //   Nose tip:        y=230
+  //   Mouth line:      y=280
+  //   Chin tip:        y=340
+
+  svg.innerHTML = `
+    <!-- Soft oval boundary -->
+    <path class="silhouette-path" d="${ovalPath}"/>
+
+    <!-- ⭐ EYE LEVEL — THE MOST IMPORTANT REFERENCE -->
+    <!-- Bold horizontal line full-width that user aligns eyes to -->
+    <line x1="55" y1="170" x2="245" y2="170"
+          stroke="${accent}" stroke-width="1.4" stroke-dasharray="6 4" opacity="0.85"/>
+    <!-- Eye position dots (typical interpupillary spacing) -->
+    <circle cx="120" cy="170" r="4" fill="${accent}" opacity="0.85">
+      <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="180" cy="170" r="4" fill="${accent}" opacity="0.85">
+      <animate attributeName="r" values="4;6;4" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Eye level label -->
+    <text x="150" y="158" fill="${accent}" font-size="10" font-weight="800"
+          text-anchor="middle" font-family="Inter" letter-spacing="0.15em" opacity="0.9">⬤ ALIGN EYES HERE ⬤</text>
+
+    <!-- Vertical center axis -->
+    <line x1="150" y1="60" x2="150" y2="345"
+          stroke="${accent}" stroke-width="0.6" stroke-dasharray="3 5" opacity="0.30"/>
+
+    <!-- Nose center indicator (small subtle) -->
+    <circle cx="150" cy="230" r="2.5" fill="${accent}" opacity="0.5"/>
+    <text x="160" y="234" fill="${accentSoft}" font-size="8" font-weight="600"
+          font-family="Inter" opacity="0.55">nose tip</text>
+
+    <!-- Mouth indicator (small horizontal) -->
+    <line x1="130" y1="280" x2="170" y2="280"
+          stroke="${accent}" stroke-width="1" opacity="0.45"/>
+    <text x="180" y="283" fill="${accentSoft}" font-size="8" font-weight="600"
+          font-family="Inter" opacity="0.55">mouth</text>
+
+    <!-- Chin marker -->
+    <circle cx="150" cy="340" r="2" fill="${accent}" opacity="0.55"/>
+
+    <!-- Subtle jaw hint per variant -->
+    ${currentVariant === 'man' ? `
+      <!-- Man: angular jaw bracket -->
+      <path d="M88,260 Q105,310 140,335" stroke="${accent}" stroke-width="1" fill="none" opacity="0.30" stroke-linecap="round"/>
+      <path d="M212,260 Q195,310 160,335" stroke="${accent}" stroke-width="1" fill="none" opacity="0.30" stroke-linecap="round"/>
+    ` : `
+      <!-- Woman: softer jaw curve -->
+      <path d="M95,260 Q108,300 142,330" stroke="${accent}" stroke-width="0.8" fill="none" opacity="0.25" stroke-linecap="round"/>
+      <path d="M205,260 Q192,300 158,330" stroke="${accent}" stroke-width="0.8" fill="none" opacity="0.25" stroke-linecap="round"/>
+    `}
+
+    <!-- Camera viewfinder corner brackets (clinic feel) -->
+    <g stroke="${accent}" stroke-width="2.2" fill="none" opacity="0.5" stroke-linecap="round">
+      <path d="M28,76 L28,52 L52,52"/>
+      <path d="M272,76 L272,52 L248,52"/>
+      <path d="M28,324 L28,348 L52,348"/>
+      <path d="M272,324 L272,348 L248,348"/>
+    </g>
+
+    <!-- Instruction at top -->
+    <rect x="60" y="22" width="180" height="20" rx="10" fill="${accent}" opacity="0.15"/>
+    <text x="150" y="36" fill="${accent}" font-size="10" font-weight="800"
+          text-anchor="middle" font-family="Inter" letter-spacing="0.1em" opacity="0.95">FIT FACE INSIDE OVAL</text>
+  `;
+}
+
+// ── Twibbon annotation overlay ──
+// face-api 68-point dlib standard:
+//   0-16 jawline (right ear → chin → left ear, viewer-perspective)
+//     0:  viewer's left ear / face's right ear
+//     4:  upper-right jaw (cheek-jaw intersection, viewer's left)
+//     5:  mid-right jaw
+//     6:  lower-right jaw (close to chin)
+//     8:  chin tip (bottom center)
+//     10: lower-left jaw
+//     11: mid-left jaw
+//     12: upper-left jaw (cheek-jaw intersection, viewer's right)
+//     16: viewer's right ear / face's left ear
+//   17-21 left brow (viewer's right side)
+//   22-26 right brow (viewer's left side)
+//   21,22 = inner brow midpoint (between brows)
+//   27-30 nose bridge (top to bottom)
+//   31-35 nose bottom (left nostril → right nostril)
+//   36-41 left eye (viewer's right):  36 outer, 39 inner, 37/38 top, 40/41 bottom
+//   42-47 right eye (viewer's left):  42 inner, 45 outer, 43/44 top, 46/47 bottom
+//   48 left mouth corner (viewer's right)
+//   54 right mouth corner (viewer's left)
+//   60-67 inner mouth
+//
+// IMPORTANT: offsets are RATIOS of face box dimensions (not pixels)
+// — scales correctly regardless of photo size or face position.
+const CONCERN_ANCHORS = {
+  // Under-eye area (dark circles) — average bottom of both eyes + slight down
+  'Mata Panda':       { landmarks: [40, 41, 46, 47], offsetXRatio: 0,      offsetYRatio: 0.025, side: 'left' },
+
+  // T-zone pori (between brows / top of nose bridge) — exactly at point 27
+  'Pori T-Zone':      { landmarks: [27],             offsetXRatio: 0,      offsetYRatio: 0,     side: 'right' },
+
+  // Forehead skin texture — inner brow midpoint, push UP 6% face height (small, tetap di forehead skin)
+  'Tekstur Forehead': { landmarks: [21, 22],         offsetXRatio: 0,      offsetYRatio: -0.06, side: 'right' },
+
+  // Jawline definition — UPPER jaw (point 3,4 = cheek-jaw junction)
+  // This is where "jawline definition" is anatomically: cheekbone-to-jaw transition
+  // Point 5,6 too close to chin, would land on neck. Point 3,4 lands on actual jaw line.
+  'Jawline':          { landmarks: [3, 4],           offsetXRatio: 0,      offsetYRatio: 0,     side: 'left' },
+
+  // Right mouth corner (lip asymmetry indicator)
+  'Lip Asym.':        { landmarks: [54],             offsetXRatio: 0.025,  offsetYRatio: 0,     side: 'right' }
+};
+
+function avgPoint(landmarks, indices) {
+  const pts = indices.map(i => landmarks[i]).filter(Boolean);
+  if (!pts.length) return null;
+  return {
+    x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+    y: pts.reduce((s, p) => s + p.y, 0) / pts.length
+  };
+}
+
+// Run face-api on whatever image is currently in resultPhoto (captured or stock)
+async function analyzeResultPhoto() {
+  if (!faceModelsLoaded || typeof faceapi === 'undefined') {
+    // Models not loaded yet, schedule retry
+    setTimeout(analyzeResultPhoto, 500);
+    return;
+  }
+  const img = document.getElementById('resultPhoto');
+  if (!img) return;
+  // Wait for image to be loaded
+  if (!img.complete || !img.naturalWidth) {
+    img.onload = () => analyzeResultPhoto();
+    return;
+  }
+  try {
+    const detection = await faceapi
+      .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.4 }))
+      .withFaceLandmarks();
+    if (detection) {
+      window.capturedLandmarks = detection.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
+      window.capturedDimensions = { width: img.naturalWidth, height: img.naturalHeight };
+      window.capturedFaceBox = {
+        x: detection.detection.box.x,
+        y: detection.detection.box.y,
+        width: detection.detection.box.width,
+        height: detection.detection.box.height
+      };
+      console.log('[analyze] Face detected:', detection.detection.score.toFixed(2), 'landmarks:', window.capturedLandmarks.length);
+      drawTwibbonAnnotations();
+    } else {
+      console.warn('[analyze] No face detected — using fallback positions');
+      window.capturedLandmarks = null;
+      drawTwibbonAnnotations();
+    }
+  } catch (err) {
+    console.warn('[analyze] Detection failed:', err.message);
+  }
+}
+
+function drawTwibbonAnnotations() {
+  const overlay = document.getElementById('twibbonOverlay');
+  if (!overlay) return;
+
+  const concerns = [
+    { label: 'Mata Panda', sev: 'severe', color: '#ff3344' },
+    { label: 'Pori T-Zone', sev: 'moderate', color: '#ffb000' },
+    { label: 'Tekstur Forehead', sev: 'mild', color: '#00e060' },
+    { label: 'Jawline', sev: 'moderate', color: '#ffb000' },
+    { label: 'Lip Asym.', sev: 'mild', color: '#00e060' }
+  ];
+
+  // If we have detected landmarks from the actual photo, use them
+  // Otherwise fall back to default positions
+  let annotations;
+  if (window.capturedLandmarks && window.capturedDimensions && window.capturedFaceBox) {
+    const W = window.capturedDimensions.width;
+    const H = window.capturedDimensions.height;
+    const fbW = window.capturedFaceBox.width;
+    const fbH = window.capturedFaceBox.height;
+    const lm = window.capturedLandmarks;
+
+    annotations = concerns.map(c => {
+      const anchor = CONCERN_ANCHORS[c.label];
+      const pt = avgPoint(lm, anchor.landmarks);
+      if (!pt) return null;
+      // Offsets are RATIOS of face box (so they scale with face size)
+      const offsetX = (anchor.offsetXRatio || 0) * fbW;
+      const offsetY = (anchor.offsetYRatio || 0) * fbH;
+      const x_norm = (pt.x + offsetX) / W;
+      const y_norm = (pt.y + offsetY) / H;
+      return {
+        ...c,
+        x: Math.max(0.05, Math.min(0.95, x_norm)),
+        y: Math.max(0.05, Math.min(0.95, y_norm)),
+        side: anchor.side
+      };
+    }).filter(Boolean);
+  } else {
+    // Fallback positions (for stock photo demo when no real capture)
+    annotations = [
+      { ...concerns[0], x: 0.32, y: 0.38, side: 'left' },
+      { ...concerns[1], x: 0.55, y: 0.30, side: 'right' },
+      { ...concerns[2], x: 0.50, y: 0.22, side: 'right' },
+      { ...concerns[3], x: 0.30, y: 0.78, side: 'left' },
+      { ...concerns[4], x: 0.55, y: 0.68, side: 'right' }
+    ];
+  }
+
+  // Build SVG with lines + dots
+  const svg = `
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%;position:absolute;inset:0">
+      <defs><filter id="g"><feGaussianBlur stdDeviation="0.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      ${annotations.map((a, i) => {
+        const lx = a.side === 'left' ? Math.max(0.04, a.x - 0.22) : Math.min(0.96, a.x + 0.22);
+        const ly = a.y + (i % 2 === 0 ? -0.03 : 0.03);
+        return `
+          <g style="animation: fadeUp 600ms ease-out ${i * 150 + 200}ms both">
+            <circle cx="${a.x*100}" cy="${a.y*100}" r="1.3" fill="${a.color}" filter="url(#g)">
+              <animate attributeName="r" values="1.3;2.2;1.3" dur="1.8s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="${a.x*100}" cy="${a.y*100}" r="0.6" fill="#fff"/>
+            <line x1="${a.x*100}" y1="${a.y*100}" x2="${lx*100}" y2="${ly*100}" stroke="${a.color}" stroke-width="0.35" stroke-dasharray="0.8,0.4" opacity="0.85"/>
+          </g>`;
+      }).join('')}
+    </svg>
+  `;
+
+  // Build HTML labels (positioned absolutely)
+  const labels = annotations.map((a, i) => {
+    const lx = a.side === 'left' ? Math.max(0.04, a.x - 0.22) : Math.min(0.96, a.x + 0.22);
+    const ly = a.y + (i % 2 === 0 ? -0.03 : 0.03);
+    const transform = a.side === 'left' ? 'translate(-100%, -50%)' : 'translate(0, -50%)';
+    return `<div class="anno-card" style="left:${lx*100}%;top:${ly*100}%;color:${a.color};transform:${transform};animation:fadeUp 500ms ease-out ${i*150+700}ms both;max-width:130px"><span class="anno-dot"></span>${a.label}</div>`;
+  }).join('');
+
+  overlay.innerHTML = svg + labels + buildDebugLandmarks();
+}
+
+// ── Camera ──
+async function startCamera() {
+  const video = document.getElementById('video');
+  const overlay = document.getElementById('demoOverlay');
+  const btnStart = document.getElementById('btnStartCam');
+  const btnCapture = document.getElementById('btnCapture');
+  const fb = document.getElementById('feedback');
+  const fbText = document.getElementById('feedbackText');
+
+  try {
+    fbText.textContent = 'Loading camera + face models...';
+    fb.className = 'feedback warn';
+
+    videoStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } }
+    });
+    video.srcObject = videoStream;
+    overlay.style.display = 'none';
+    btnStart.style.display = 'none';
+    btnCapture.disabled = false;
+
+    // Load face-api.js models
+    if (typeof faceapi !== 'undefined' && !faceModelsLoaded) {
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+        faceModelsLoaded = true;
+      } catch (e) {
+        console.warn('[mockup] face-api models failed to load:', e.message);
+      }
+    }
+
+    fbText.textContent = 'Posisikan wajah dalam guide';
+    fb.className = 'feedback';
+
+    // Start realtime detection
+    if (faceModelsLoaded) startFaceDetection();
+    else {
+      // Fallback: assume aligned after 2 sec
+      setTimeout(() => {
+        fbText.innerHTML = '<span class="dot"></span> Wajah aligned · Klik tombol ⬤';
+        fb.className = 'feedback ok';
+      }, 2000);
+    }
+  } catch (err) {
+    fbText.textContent = '❌ ' + (err.message || 'Camera access denied');
+    fb.className = 'feedback bad';
+  }
+}
+
+function stopCamera() {
+  if (videoStream) {
+    videoStream.getTracks().forEach(t => t.stop());
+    videoStream = null;
+  }
+  if (detectionInterval) {
+    cancelAnimationFrame(detectionInterval);
+    detectionInterval = null;
+  }
+}
+
+function startFaceDetection() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('faceMesh');
+  const fb = document.getElementById('feedback');
+  const fbText = document.getElementById('feedbackText');
+
+  const detect = async () => {
+    if (video.readyState >= 2) {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+
+      try {
+        const detection = await faceapi
+          .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 }))
+          .withFaceLandmarks();
+
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.scale(-1, 1); // mirror
+        ctx.translate(-canvas.width, 0);
+
+        if (detection) {
+          const positions = detection.landmarks.positions;
+          const accent = currentVariant === 'man' ? '#FF0000' : '#E8639A';
+          const accentGlow = currentVariant === 'man' ? 'rgba(255,0,0,0.5)' : 'rgba(232,99,154,0.5)';
+
+          // Draw mesh: connect landmarks for each group
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = accentGlow;
+          ctx.strokeStyle = accent;
+          ctx.lineWidth = 1.2;
+          ctx.fillStyle = '#fff';
+
+          // Connect groups
+          const groups = [
+            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+            [17,18,19,20,21],
+            [22,23,24,25,26],
+            [27,28,29,30],
+            [31,32,33,34,35],
+            [36,37,38,39,40,41,36],
+            [42,43,44,45,46,47,42],
+            [48,49,50,51,52,53,54,55,56,57,58,59,48],
+            [60,61,62,63,64,65,66,67,60]
+          ];
+
+          groups.forEach(group => {
+            ctx.beginPath();
+            group.forEach((idx, i) => {
+              const p = positions[idx];
+              if (i === 0) ctx.moveTo(p.x, p.y);
+              else ctx.lineTo(p.x, p.y);
+            });
+            ctx.stroke();
+          });
+
+          // Draw points
+          ctx.shadowBlur = 0;
+          positions.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          });
+
+          // Check alignment (face center near image center)
+          const box = detection.detection.box;
+          const cx = box.x + box.width / 2;
+          const cy = box.y + box.height / 2;
+          const cxRatio = cx / canvas.width;
+          const cyRatio = cy / canvas.height;
+          const sizeRatio = box.width / canvas.width;
+
+          let status = 'ok';
+          let msg = '✓ Wajah aligned · Klik ⬤';
+          if (sizeRatio < 0.30) { status = 'warn'; msg = '↑ Lebih dekat'; }
+          else if (sizeRatio > 0.65) { status = 'warn'; msg = '↓ Lebih jauh'; }
+          else if (Math.abs(cxRatio - 0.5) > 0.15) { status = 'warn'; msg = '← → Geser ke tengah'; }
+          else if (Math.abs(cyRatio - 0.5) > 0.15) { status = 'warn'; msg = '↑ ↓ Geser vertikal'; }
+
+          fb.className = 'feedback ' + status;
+          fbText.innerHTML = `<span class="dot"></span> ${msg}`;
+        } else {
+          fb.className = 'feedback bad';
+          fbText.innerHTML = '<span class="dot"></span> Wajah tidak terdeteksi';
+        }
+        ctx.restore();
+      } catch (err) {
+        // Silent fail
+      }
+    }
+    detectionInterval = requestAnimationFrame(detect);
+  };
+  detect();
+}
+
+async function captureSelfie() {
+  const video = document.getElementById('video');
+  if (!video.videoWidth) return;
+
+  // Capture mirrored selfie (natural orientation, not flipped)
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(-1, 1);
+  ctx.translate(-canvas.width, 0);
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+  document.getElementById('previewImg').src = dataUrl;
+  const resultPhoto = document.getElementById('resultPhoto');
+  resultPhoto.src = dataUrl;
+  resultPhoto.dataset.userCaptured = '1'; // mark as real user photo so variant toggle won't overwrite
+
+  // ── Detect landmarks on the CAPTURED photo (so we get coords matching the natural-orientation image) ──
+  if (faceModelsLoaded && typeof faceapi !== 'undefined') {
+    try {
+      // Create img element from the canvas (face-api works with HTMLImageElement)
+      const img = new Image();
+      img.src = dataUrl;
+      await new Promise(res => { img.onload = res; });
+
+      const detection = await faceapi
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.5 }))
+        .withFaceLandmarks();
+
+      if (detection) {
+        window.capturedLandmarks = detection.landmarks.positions.map(p => ({ x: p.x, y: p.y }));
+        window.capturedDimensions = { width: canvas.width, height: canvas.height };
+        window.capturedFaceBox = {
+          x: detection.detection.box.x,
+          y: detection.detection.box.y,
+          width: detection.detection.box.width,
+          height: detection.detection.box.height
+        };
+        console.log('[capture] Detected', window.capturedLandmarks.length, 'landmarks');
+        console.log('[capture] Face box:', window.capturedFaceBox);
+        console.log('[capture] Photo dimensions:', window.capturedDimensions);
+      } else {
+        console.warn('[capture] No face detected in captured photo — annotations will use fallback positions');
+        window.capturedLandmarks = null;
+        window.capturedDimensions = null;
+        window.capturedFaceBox = null;
+      }
+    } catch (err) {
+      console.warn('[capture] Landmark detection failed:', err.message);
+    }
+  }
+
+  goScreen(2);
+}
+
+function submitToAI() {
+  const age = document.getElementById('age').value;
+  if (!age) { alert('Umur wajib diisi.'); return; }
+  // In real flow: POST to /api/scan with photo + form data
+  // Mockup: just navigate to result
+  goScreen(3);
+}
+
+// Init goal chip toggles
+document.querySelectorAll('#goalsChips .chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+// ── Debug mode: show all 68 landmarks on photo ──
+let debugMode = false;
+function toggleDebug() {
+  debugMode = !debugMode;
+  document.getElementById('btn-debug').style.background = debugMode ? '#ffb000' : 'rgba(255,176,0,0.3)';
+  document.getElementById('btn-debug').style.color = debugMode ? '#000' : '#ffb000';
+  drawTwibbonAnnotations();
+}
+
+function buildDebugLandmarks() {
+  if (!debugMode || !window.capturedLandmarks || !window.capturedDimensions) return '';
+  const W = window.capturedDimensions.width;
+  const H = window.capturedDimensions.height;
+  const lm = window.capturedLandmarks;
+
+  // Group colors
+  const groupColor = (i) => {
+    if (i <= 16) return '#00d4ff';        // jawline (cyan)
+    if (i <= 21) return '#ffb000';        // left brow (yellow)
+    if (i <= 26) return '#ff9000';        // right brow (orange)
+    if (i <= 30) return '#ff00ff';        // nose bridge (magenta)
+    if (i <= 35) return '#bb00ff';        // nose bottom (purple)
+    if (i <= 41) return '#00ff8c';        // left eye (green)
+    if (i <= 47) return '#00ff44';        // right eye (bright green)
+    return '#ff3344';                      // mouth (red)
+  };
+
+  const points = lm.map((p, i) => `
+    <circle cx="${(p.x/W)*100}" cy="${(p.y/H)*100}" r="0.6" fill="${groupColor(i)}" opacity="0.9"/>
+    <text x="${(p.x/W)*100}" y="${(p.y/H)*100 - 0.8}" fill="${groupColor(i)}" font-size="1.2" font-weight="700"
+          text-anchor="middle" font-family="monospace" opacity="0.95">${i}</text>
+  `).join('');
+
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="width:100%;height:100%;position:absolute;inset:0;pointer-events:none;z-index:5">${points}</svg>`;
+}
+
+// Boot: eager-load face-api models in background, draw silhouette + annotations
+async function eagerLoadModels() {
+  if (typeof faceapi === 'undefined') {
+    setTimeout(eagerLoadModels, 200);
+    return;
+  }
+  try {
+    await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+    await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+    faceModelsLoaded = true;
+    console.log('[boot] Face-api models loaded');
+    // If we're already on screen 3, analyze the current photo
+    if (currentScreen === 3) analyzeResultPhoto();
+  } catch (err) {
+    console.warn('[boot] Models failed:', err.message);
+  }
+}
+eagerLoadModels();
+
+drawSilhouette();
+drawTwibbonAnnotations();
+</script>
+</body>
+</html>
