@@ -103,6 +103,11 @@ const ScoreCard = (function () {
         </div>
         <div class="sc-grid">${grid}</div>
         ${ctaHTML}
+        <div class="sc-brand">
+          <span class="sc-brand-ic">✨</span>
+          <span class="sc-brand-text">Maxlook</span>
+          <span class="sc-brand-tag">AI Face Scan</span>
+        </div>
       </div>
     `;
   }
@@ -122,6 +127,7 @@ const ScoreCard = (function () {
       <div class="sc-cell potential" data-tier="${tier(value)}">
         <div class="lbl">Potential</div>
         <div class="val">${value}</div>
+        <div class="sc-glowup">GLOW UP</div>
         <div class="sc-bar"><div class="fill" style="width:0%" data-target="${value}%"></div></div>
         ${deltaText ? `<div class="sc-delta">${deltaText}</div>` : ''}
       </div>`;
