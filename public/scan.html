@@ -877,49 +877,81 @@ async function init() {
 async function startCamera() {
   const fb = document.getElementById('camFeedback');
   const fbT = document.getElementById('camFeedbackText');
+  const demoBg = document.getElementById('demoBg');
   fbT.textContent = 'Mengaktifkan kamera...';
   fb.className = 'cam-status-pill warn';
+  console.log('[camera] starting...');
+
+  // Timeout 12s — kalau getUserMedia hang, abort
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Camera timeout — permission may be blocked')), 12000);
+  });
 
   try {
-    videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } }
-    });
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Browser tidak support kamera (need HTTPS + modern browser)');
+    }
+    videoStream = await Promise.race([
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } }
+      }),
+      timeoutPromise
+    ]);
+    clearTimeout(timeoutId);
+    console.log('[camera] ✓ got stream', videoStream);
     document.getElementById('video').srcObject = videoStream;
-    document.getElementById('demoBg').style.display = 'none';
+    demoBg.style.display = 'none';
     document.getElementById('captureBtn').disabled = false;
     fbT.textContent = 'Posisikan wajah';
     fb.className = 'cam-status-pill';
 
-    if (typeof faceapi !== 'undefined' && !faceModelsLoaded) {
-      try {
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        faceModelsLoaded = true;
-      } catch (e) { console.warn('[face-api]', e.message); }
-    }
-    if (faceModelsLoaded) startLiveDetection();
-
-    // ── Start MediaPipe FaceMesh live wireframe overlay ──
-    try {
-      if (window.MaxlookFaceMesh && !window.__mxLiveMesh) {
-        const video = document.getElementById('video');
-        const mesh = document.getElementById('faceMesh');
-        // Wait for video to have real dimensions
-        await new Promise(r => {
-          if (video.readyState >= 2) return r();
-          video.addEventListener('loadeddata', r, { once: true });
-        });
-        window.__mxLiveMesh = await window.MaxlookFaceMesh.startLive(video, mesh, {
-          color: 'rgba(255,255,255,0.55)',
-          lineWidth: 0.5,
-          showDots: false
-        });
+    // Decouple face-api + FaceMesh — biar ngga block kalau lambat/error
+    setTimeout(async () => {
+      // face-api landmarks (untuk backend data)
+      if (typeof faceapi !== 'undefined' && !faceModelsLoaded) {
+        try {
+          await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+          await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+          faceModelsLoaded = true;
+          startLiveDetection();
+        } catch (e) { console.warn('[face-api]', e.message); }
       }
-    } catch (e) { console.warn('[FaceMesh-live]', e); }
+      // MediaPipe FaceMesh wireframe (visual)
+      try {
+        if (window.MaxlookFaceMesh && !window.__mxLiveMesh) {
+          const video = document.getElementById('video');
+          const mesh = document.getElementById('faceMesh');
+          if (video.readyState < 2) {
+            await new Promise(r => video.addEventListener('loadeddata', r, { once: true }));
+          }
+          window.__mxLiveMesh = await window.MaxlookFaceMesh.startLive(video, mesh, {
+            color: 'rgba(255,255,255,0.55)',
+            lineWidth: 0.5,
+            showDots: false
+          });
+          console.log('[FaceMesh] live tracking started');
+        }
+      } catch (e) { console.warn('[FaceMesh-live]', e); }
+    }, 100);
   } catch (err) {
-    console.warn('[camera]', err.message);
-    fbT.textContent = 'Kamera tidak tersedia · Upload File';
+    clearTimeout(timeoutId);
+    console.error('[camera] FAILED:', err.name, err.message);
+    let msg = 'Kamera tidak tersedia';
+    if (err.name === 'NotAllowedError' || err.message.includes('Permission')) {
+      msg = '🚫 Akses kamera diblokir — klik icon kunci di URL bar → Allow Camera → reload';
+    } else if (err.name === 'NotFoundError') {
+      msg = '📷 Kamera tidak ditemukan di device ini';
+    } else if (err.name === 'NotReadableError') {
+      msg = '⚠️ Kamera dipake app lain — close dulu (Zoom, Meet, dll)';
+    } else if (err.message.includes('timeout')) {
+      msg = '⏳ Permission stuck — refresh page + klik Allow saat prompt muncul';
+    }
+    fbT.textContent = msg;
     fb.className = 'cam-status-pill warn';
+    // Show tap-to-retry button overlay
+    demoBg.innerHTML = '<div class="ic">📷</div><div style="text-align:center;padding:0 20px;line-height:1.5">' + msg + '<br><br><button onclick="restartCamera()" style="margin-top:12px;padding:12px 24px;background:#FF0000;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer">↻ Coba Lagi</button></div>';
+    demoBg.style.display = 'flex';
   }
 }
 
@@ -1107,57 +1139,4 @@ async function submitScan() {
   if (wearsHijab !== null) formData.append('wears_hijab', wearsHijab ? '1' : '0');
   if (selectedGoals.length) formData.append('goals', JSON.stringify(selectedGoals));
   if (capturedLandmarks) formData.append('face_landmarks', JSON.stringify(capturedLandmarks));
-  if (capturedFaceBox) formData.append('face_box', JSON.stringify(capturedFaceBox));
-
-  try {
-    const res = await fetch('/api/scan', {
-      method: 'POST',
-      headers: { 'X-Maxlook-Token': token },
-      body: formData
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      showScanError(data.message || data.error || 'Scan gagal — coba lagi');
-      return;
-    }
-    if (!data?.scan?.id) {
-      showScanError('AI berhasil scan, tapi data tidak lengkap. Coba scan ulang.');
-      return;
-    }
-
-    completeAllSteps();
-    document.getElementById('scanStatusTtl').textContent = '✓ Analisis selesai';
-    setTimeout(() => {
-      window.location.href = `/result?id=${data.scan.id}&token=${encodeURIComponent(token)}`;
-    }, 1200);
-
-  } catch (err) {
-    console.error('[scan] Network error:', err);
-    showScanError('Network error: ' + err.message);
-  }
-}
-
-async function renderScanLandmarks() {
-  const container = document.getElementById('scanLandmarks');
-  if (!container) return;
-  // Replace container with a <canvas> if not already
-  container.innerHTML = '<canvas id="scanMeshCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas>';
-  const canvas = document.getElementById('scanMeshCanvas');
-  const img = document.getElementById('scanPhoto');
-
-  // Wait for image to load
-  if (!img.complete || !img.naturalWidth) {
-    await new Promise(r => img.addEventListener('load', r, { once: true }));
-  }
-
-  // Run MediaPipe FaceMesh on the captured photo
-  try {
-    if (window.MaxlookFaceMesh) {
-      await window.MaxlookFaceMesh.drawStatic(img, canvas, {
-        color: 'rgba(255,255,255,0.6)',
-        lineWidth: 0.8,
-        showDots: true,
-        dotColor: 'rgba(255,255,255,0.7)',
-        dotRadius: 0.9
-      
+  if (capturedF
