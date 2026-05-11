@@ -926,9 +926,16 @@ async function startCamera() {
             await new Promise(r => video.addEventListener('loadeddata', r, { once: true }));
           }
           window.__mxLiveMesh = await window.MaxlookFaceMesh.startLive(video, mesh, {
-            color: 'rgba(255,255,255,0.55)',
-            lineWidth: 0.5,
-            showDots: false
+            color: 'rgba(255,255,255,0.35)',
+            lineWidth: 0.4,
+            showDots: false,
+            highlightFeatures: true,
+            featureColor: 'rgba(255,255,255,1)',
+            featureWidth: 1.6,
+            glow: true,
+            glowColor: 'rgba(255,255,255,0.7)',
+            smooth: true,
+            smoothAlpha: 0.65
           });
           console.log('[FaceMesh] live tracking started');
         }
