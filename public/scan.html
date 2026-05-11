@@ -926,14 +926,13 @@ async function startCamera() {
             await new Promise(r => video.addEventListener('loadeddata', r, { once: true }));
           }
           window.__mxLiveMesh = await window.MaxlookFaceMesh.startLive(video, mesh, {
+            // Pure tesselation only — no eye/lip/brow/nose highlights, no oval ring
+            // Eyes stay naturally visible through the tipis wireframe (TikTok-style)
             color: 'rgba(255,255,255,0.35)',
             lineWidth: 0.4,
             showDots: false,
-            highlightFeatures: true,
-            featureColor: 'rgba(255,255,255,1)',
-            featureWidth: 1.6,
-            glow: true,
-            glowColor: 'rgba(255,255,255,0.7)',
+            highlightFeatures: false,
+            showOval: false,
             smooth: true,
             smoothAlpha: 0.65
           });
