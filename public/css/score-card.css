@@ -176,17 +176,19 @@ body.woman .sc-bar { background: rgba(232,99,154,0.10); }
   box-shadow: 0 0 0 1px rgba(255,215,0,0.10), 0 8px 24px rgba(255,180,0,0.10);
   position: relative;
 }
-.sc-cell.potential::before {
-  content: 'GLOW UP';
-  position: absolute;
-  top: 14px; right: 14px;
-  font-size: 8px;
+/* GLOW UP badge — placed BELOW score (was top-right corner, was covering POTENTIAL label) */
+.sc-cell.potential .sc-glowup {
+  display: inline-block;
+  margin: 6px 0 4px 0;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.18em;
   background: linear-gradient(135deg, #FFD700, #FFA500);
   color: #000;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 3px 9px;
+  border-radius: 5px;
+  align-self: flex-start;
+  box-shadow: 0 2px 8px rgba(255,180,0,0.25);
 }
 .sc-cell.potential .lbl {
   background: linear-gradient(135deg, #FFD700, #FFA500);
@@ -272,3 +274,56 @@ body.woman .sc-cta {
 .score-card.compact .sc-cell .val {
   font-size: 24px;
 }
+
+/* ═══ Brand footer ═══ */
+.score-card .sc-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+body.woman .score-card .sc-brand {
+  border-top-color: rgba(232,99,154,0.10);
+}
+.score-card .sc-brand-ic {
+  width: 20px; height: 20px;
+  border-radius: 5px;
+  background: linear-gradient(135deg, #FF0000, #E8639A);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.score-card .sc-brand-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.65);
+  text-transform: uppercase;
+}
+body.woman .score-card .sc-brand-text { color: rgba(58,16,32,0.7); }
+.score-card .sc-brand-tag {
+  font-family: 'Poppins', system-ui, sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  border-left: 1px solid rgba(255,255,255,0.12);
+  padding-left: 10px;
+  margin-left: 2px;
+}
+body.woman .score-card .sc-brand-tag {
+  color: rgba(58,16,32,0.45);
+  border-left-color: rgba(232,99,154,0.18);
+}
+/* Compact variant: smaller brand */
+.score-card.compact .sc-brand { margin-top: 14px; padding-top: 12px; }
+.score-card.compact .sc-brand-ic { width: 16px; height: 16px; font-size: 9px; }
+.score-card.compact .sc-brand-text { font-size: 11px; }
+.score-card.compact .sc-brand-tag { font-size: 8px; }
