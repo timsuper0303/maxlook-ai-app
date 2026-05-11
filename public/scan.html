@@ -1139,4 +1139,105 @@ async function submitScan() {
   if (wearsHijab !== null) formData.append('wears_hijab', wearsHijab ? '1' : '0');
   if (selectedGoals.length) formData.append('goals', JSON.stringify(selectedGoals));
   if (capturedLandmarks) formData.append('face_landmarks', JSON.stringify(capturedLandmarks));
-  if (capturedF
+  if (capturedFaceBox) formData.append('face_box', JSON.stringify(capturedFaceBox));
+
+  try {
+    const res = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'X-Maxlook-Token': token },
+      body: formData
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showScanError(data.message || data.error || 'Scan gagal — coba lagi');
+      return;
+    }
+    if (!data?.scan?.id) {
+      showScanError('AI berhasil scan, tapi data tidak lengkap. Coba scan ulang.');
+      return;
+    }
+
+    completeAllSteps();
+    document.getElementById('scanStatusTtl').textContent = '✓ Analisis selesai';
+    setTimeout(() => {
+      window.location.href = `/result?id=${data.scan.id}&token=${encodeURIComponent(token)}`;
+    }, 1200);
+
+  } catch (err) {
+    console.error('[scan] Network error:', err);
+    showScanError('Network error: ' + err.message);
+  }
+}
+
+async function renderScanLandmarks() {
+  const container = document.getElementById('scanLandmarks');
+  if (!container) return;
+  // Replace container with a <canvas> if not already
+  container.innerHTML = '<canvas id="scanMeshCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas>';
+  const canvas = document.getElementById('scanMeshCanvas');
+  const img = document.getElementById('scanPhoto');
+
+  // Wait for image to load
+  if (!img.complete || !img.naturalWidth) {
+    await new Promise(r => img.addEventListener('load', r, { once: true }));
+  }
+
+  // Run MediaPipe FaceMesh on the captured photo
+  try {
+    if (window.MaxlookFaceMesh) {
+      await window.MaxlookFaceMesh.drawStatic(img, canvas, {
+        color: 'rgba(255,255,255,0.6)',
+        lineWidth: 0.8,
+        showDots: true,
+        dotColor: 'rgba(255,255,255,0.7)',
+        dotRadius: 0.9
+      });
+      // Add pulse animation via CSS
+      canvas.style.animation = 'meshPulse 2.5s ease-in-out infinite';
+      if (!document.getElementById('__mx_mesh_pulse_css')) {
+        const st = document.createElement('style');
+        st.id = '__mx_mesh_pulse_css';
+        st.textContent = '@keyframes meshPulse { 0%,100% { opacity: 0.55; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); } 50% { opacity: 1; filter: drop-shadow(0 0 10px rgba(255,255,255,0.8)); } }';
+        document.head.appendChild(st);
+      }
+    }
+  } catch (e) {
+    console.warn('[scan-mesh]', e);
+  }
+}
+
+function animateSteps() {
+  const steps = document.querySelectorAll('.substeps .step');
+  let idx = 0;
+  const interval = setInterval(() => {
+    if (idx >= steps.length - 1) { clearInterval(interval); return; }
+    steps[idx].classList.remove('active');
+    steps[idx].classList.add('done');
+    steps[idx].querySelector('.ic').textContent = '✓';
+    idx++;
+    steps[idx].classList.add('active');
+    steps[idx].querySelector('.ic').textContent = '●';
+  }, 3000);
+}
+
+function completeAllSteps() {
+  document.querySelectorAll('.substeps .step').forEach(s => {
+    s.classList.remove('active');
+    s.classList.add('done');
+    s.querySelector('.ic').textContent = '✓';
+  });
+}
+
+function showError(msg) { alert(msg); }
+function showScanError(msg) {
+  document.getElementById('scanStatusTtl').textContent = 'Scan gagal';
+  const errEl = document.getElementById('scanErrorMsg');
+  document.getElementById('scanErrorText').textContent = msg;
+  errEl.classList.add('show');
+}
+
+init();
+</script>
+</body>
+</html>
