@@ -71,6 +71,15 @@ async function runFullScan({ imagePath, gender, variant, userInfo = {}, priorCon
   const rawText = response.text || '';
   console.log(`[ai-scan] Response: ${rawText.length} chars, ${response.usage?.totalTokens || '?'} tokens`);
 
+  // DIAGNOSTIC: log critical scoring fields so we can detect identical-response bug across users
+  try {
+    const peek = JSON.parse(rawText.match(/\{[\s\S]*\}/)?.[0] || '{}');
+    const colors = (peek.color_palette || []).slice(0, 3).map(c => c.hex).join(',');
+    console.log(`[ai-scan] AI raw scores → overall:${peek.overall} skin:${peek.skin_glow} jaw:${peek.jawline} cheek:${peek.cheekbones_score} season:"${peek.season}" undertone:"${peek.undertone}" colors[0..2]:${colors}`);
+  } catch (e) {
+    console.log('[ai-scan] (diagnostic peek failed — non-fatal)');
+  }
+
   if (!rawText.trim()) {
     throw new Error('AI response kosong. Coba upload foto yang lebih clear.');
   }
@@ -106,31 +115,45 @@ async function runFullScan({ imagePath, gender, variant, userInfo = {}, priorCon
 }
 
 function validateAndEnrich(result, { gender, priorContext = null }) {
-  // Core scores
-  result.overall = clamp(result.overall || 60, 0, 100);
+  // Core scores — CAP at 85 (realistic ceiling per spec)
+  result.overall = clamp(result.overall || 60, 0, 85);
 
-  // PROGRESSION FLOOR — bila ada scan sebelumnya, skor jangan turun lebih dari 2 poin
-  // (allowance 2 poin untuk AI variance, tapi cap regression hard)
+  // PROGRESSION ENFORCEMENT — bila ada scan sebelumnya:
+  // - Floor: jangan turun lebih dari 2 poin (cap regression)
+  // - Ceiling: jangan naik lebih dari 3 poin per scan (cap unrealistic progression)
   if (priorContext && priorContext.previous_overall) {
     const minAllowed = Math.max(0, priorContext.previous_overall - 2);
+    const maxAllowed = Math.min(85, priorContext.previous_overall + 3);
     if (result.overall < minAllowed) {
       console.log(`[scan] Progression floor: ${result.overall} → ${minAllowed} (prev was ${priorContext.previous_overall})`);
       result.overall = minAllowed;
     }
+    if (result.overall > maxAllowed) {
+      console.log(`[scan] Progression ceiling: ${result.overall} → ${maxAllowed} (prev was ${priorContext.previous_overall}, max +3/scan)`);
+      result.overall = maxAllowed;
+    }
   }
 
-  // POTENTIAL — floor 80 (motivasi user) + minimal +15 dari current
-  // Cap 98 (selalu ada room buat tumbuh)
-  const aiPotential = result.potential || (result.overall + 20);
+  // POTENTIAL — floor 80 (motivasi user) + minimal +5 dari current
+  // Cap 90 (realistic max — di atas itu unrealistic claim)
+  const aiPotential = result.potential || (result.overall + 10);
   result.potential = clamp(
-    Math.max(80, result.overall + 15, aiPotential),
+    Math.max(80, result.overall + 5, aiPotential),
     result.overall,
-    98
+    90
   );
 
   result.scores = result.scores || {};
   ['skin_glow', 'symmetry', 'jawline', 'eye_area', 'harmony'].forEach(k => {
-    result.scores[k] = clamp(result.scores[k] || result.overall, 0, 100);
+    // Sub-scores capped at 85 to match overall ceiling
+    result.scores[k] = clamp(result.scores[k] || result.overall, 0, 85);
+  });
+
+  // Cap top-level dimension scores too (some are at root, not in scores object)
+  ['skin_glow', 'jawline', 'cheekbones_score', 'symmetry', 'eye_area', 'harmony', 'masculinity_score', 'femininity_score'].forEach(k => {
+    if (typeof result[k] === 'number') {
+      result[k] = clamp(result[k], 0, 85);
+    }
   });
 
   result.skin_type = result.skin_type || 'combination';
