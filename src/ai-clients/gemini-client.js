@@ -32,11 +32,15 @@ async function visionScan({ prompt, imageBase64, mimeType = 'image/jpeg' }) {
   const model = genAI.getGenerativeModel({
     model: GEMINI_MODEL,
     generationConfig: {
-      temperature: 0.4,
-      maxOutputTokens: 16384,  // bumped — full JSON with 50+ concerns + zones + bone structure
+      temperature: 0.85,  // raised from 0.4 — was producing near-identical scores/colors across faces
+      topP: 0.95,         // sample from wider distribution for genuine per-face variation
+      maxOutputTokens: 16384,
       responseMimeType: 'application/json'
     }
   });
+
+  // Diagnostic: log image size so we can verify per-scan uniqueness
+  console.log(`[gemini] visionScan → prompt=${prompt.length} chars, image=${imageBase64.length} chars (${mimeType})`);
 
   const result = await model.generateContent([
     { text: prompt },
