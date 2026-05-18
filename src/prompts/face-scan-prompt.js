@@ -34,6 +34,21 @@ function buildFaceScanPrompt({ gender, variant, wearsHijab, priorContext }) {
 
   return `Lo adalah Maxlook AI Face Scanner. Analisis foto wajah ${isWoman ? 'cewek' : 'cowok'} Indonesia. Output STRICTLY JSON valid, no markdown.
 
+═══ STEP 0 — MANDATORY OBSERVATION FIRST ═══
+
+Sebelum scoring, OBSERVE foto secara teliti & SPECIFIC. Bayangin lo nge-review wajah ini dengan jeli (jangan generic):
+
+1. SKIN TONE — Apakah fair / medium / tan / dark? Undertone golongan kuning, merah muda, olive, atau netral? Ada hyperpigmentasi, dark spots, atau merah-merah jerawat?
+2. FACE SHAPE — Oval, round, square, heart, atau long? Forehead lebar atau sempit? Chin runcing atau tumpul?
+3. EYES — Almond, monolid, hooded, round? Ada eyebag, dark circle, atau puffy?
+4. NOSE — Lebar, ramping, mancung, atau pesek? Bridge tinggi atau flat?
+5. LIPS — Tipis, sedang, atau penuh? Cupid's bow definite atau lembut?
+6. JAWLINE — Tegas / lembut / soft / undefined? Ada double chin?
+7. CHEEKBONES — Prominent / flat / hollow / chubby?
+8. HAIR — Warna asli (hitam, coklat, dyed)? Texture lurus, gelombang, atau keriting?
+
+CRITICAL: Setiap wajah HARUS dapet UNIQUE analysis & scores. JANGAN default ke 60/62. JANGAN copy template warna sama untuk semua. Skor & color palette HARUS mencerminkan observasi specific lo dari foto ini.
+
 ═══ OUTPUT SCHEMA (semua wajib ada, isi yang relevan dari foto) ═══
 
 {
@@ -150,9 +165,19 @@ function buildFaceScanPrompt({ gender, variant, wearsHijab, priorContext }) {
 ═══ RULES ═══
 
 - ${tone}
-- Skor calibrate realistic: 55-65 average, 70-80 above-avg, 85+ rare.
-- Color palette 12 colors REAL hex codes sesuai personal color season theory.
-- facecard_color_picks.best_matches: 4 warna PALING flatter skin tone, dari color_palette (atau new), variasi warna (gak semua biru aja).
+- SCORING (CRITICAL — derive from actual observation, NOT default):
+  * Range natural: 45-85. Distribusi realistic: poor 45-55, below-avg 56-65, average 66-72, good 73-80, great 81-85.
+  * Cap MAX overall di 85 (di atas 85 itu genetik premium, super rare).
+  * VARIASI WAJIB — wajah ganteng/cantik dapet 75-85, wajah biasa 60-72, wajah dengan banyak concerns 50-65.
+  * Setiap dimensi (skin_glow, jawline, cheekbones, dll) bisa berbeda. JANGAN semua sama dengan overall.
+  * Jika observasi lo ngga unik (hanya generic "average"), berarti lo skip Step 0. Re-observe.
+- COLOR PALETTE — derive HEX UNIQUE per user berdasarkan skin undertone & season yang lo observe di foto:
+  * Untuk cool undertone (pink/blue subtone) → palette dingin: biru, ungu, pink dingin, abu silver
+  * Untuk warm undertone (yellow/gold subtone) → palette hangat: terracotta, mustard, olive, coklat hangat
+  * Untuk neutral → mix balanced
+  * Untuk olive → muted earthy: sage, dusty rose, terracotta soft
+  * HEX harus VARIASI per user — jangan template sama. 12 colors REAL hex codes.
+- facecard_color_picks.best_matches: 4 warna PALING flatter skin tone YANG OBSERVE LO LIAT, dari color_palette (atau new), variasi warna (gak semua biru aja).
 - facecard_color_picks.worst_matches: 4 warna yang BIKIN kusam/pucat — variasi.
 - Skincare brand: lokal Indonesia (Skintific, Hada Labo, COSRX, Wardah, Cetaphil, Skin Aqua, The Ordinary, Anessa). Price IDR realistic.
 - Top concerns: pilih yang paling visible + actionable. Severity calibrate: severe (obvious), moderate (perceptible), mild (subtle).
@@ -167,16 +192,35 @@ Ini scan #${priorContext.scan_number} untuk user yang sama.
 - Scan sebelumnya: overall = ${priorContext.previous_overall}, tanggal ${priorContext.previous_date}
 ${priorContext.previous_top_concerns && priorContext.previous_top_concerns.length ? `- Concerns dari scan sebelumnya: ${priorContext.previous_top_concerns.join(', ')}` : ''}
 
-User udah ngikutin Maxlook 30-day protocol. SCORING RULES untuk scan ini:
+User udah ngikutin Maxlook protocol. SCORING RULES untuk scan ini (REALISTIC PROGRESSION):
 
-1. CONSISTENCY — Skor harus mencerminkan progress real. Default expectation: skor naik 2-8 poin per scan kalau user beneran ngikutin protokol (skincare, mewing, sleep, hydration).
-2. NO REGRESSION tanpa alasan — Jangan kasih skor lebih rendah dari ${priorContext.previous_overall} kecuali ada masalah BARU yang OBVIOUS di foto.
-3. BASELINE COMPARISON — Bandingkan vs baseline ${priorContext.baseline_overall}. Trajektori glow up harus jelas naik.
-4. EVIDENCE-BASED — Setiap kenaikan skor harus ada justifikasinya. Jelaskan di key_insight.
-5. TOP CONCERNS evolusi — Concerns lama yang udah membaik HARUS jadi mild atau hilang. Tambahin concerns BARU.
-6. POTENTIAL trajectory — Potential tetap aspirational (80-98). Gap berkurang tiap scan kalau user progress.
+1. PROGRESSION RATE — Skor naik SUBTLE & REALISTIC: +1 to +2 poin per scan/minggu untuk overall. Sesekali +2-3 untuk minggu breakthrough, tapi DEFAULT +1-2.
+   - Skin Quality (skin_glow): bisa naik lebih cepat (+2-3 per minggu, skincare effect terlihat cepat)
+   - Cheekbones, Jawline, Symmetry, Eye Area: naik LAMBAT (+0.5-1.5 per minggu, struktur tulang stabil)
+   - Femininity/Masculinity score: +1-2 per minggu (overall harmony grows)
+   - VARIASI MUST: Jangan exactly +2 setiap minggu. Mix +1, +2, kadang +3. Mimic real human variation.
 
-Output skor sebagai snapshot realistis dari foto, TAPI dengan bias progression-aware: kalau ragu, skor cenderung NAIK.
+2. CAP MAXIMUM — Overall TIDAK boleh lebih dari 85. Setelah reach 85, plateau. Maximum potential tetap di 90 (gap 5 untuk room).
+
+3. NO REGRESSION tanpa alasan — Jangan kasih skor lebih rendah dari ${priorContext.previous_overall} kecuali ada masalah BARU yang OBVIOUS di foto (jerawat baru, kelelahan, dll).
+
+4. BASELINE COMPARISON — Bandingkan vs baseline ${priorContext.baseline_overall}. Trajektori glow up subtle but consistent.
+
+5. EVIDENCE-BASED — Setiap kenaikan harus ada justifikasinya di key_insight. Mention specifically apa yang improved (e.g., "Dark circles berkurang", "Skin lebih clear").
+
+6. TOP CONCERNS evolusi — Concerns lama yang udah membaik HARUS jadi mild atau hilang. Tambahin concerns BARU yang naturally muncul.
+
+7. POTENTIAL trajectory — Gap (potential - current) berkurang tiap scan. Awal gap bisa 20+, setelah berbulan-bulan gap tinggal 5-10.
+
+EXAMPLE CALCULATION:
+- Scan #1: overall=60, potential=80 (gap 20)
+- Scan #2 (week 2): overall=62, potential=82 (subtle +2)
+- Scan #3: overall=63 (+1, slow week)
+- Scan #4: overall=65 (+2)
+- Scan #10: overall=72-75 range
+- Scan #20+: overall plateau 80-85
+
+Output snapshot realistis tapi dengan bias progression-aware: ragu = condong NAIK +1, NEVER turun jauh.
 ` : ''}`;
 }
 
